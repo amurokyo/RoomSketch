@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport">
 <meta content="#172433" name="theme-color">
-<title>RoomSketch 2.0 · 户型绘图终极整合版</title>
+<title>RoomSketch 1.0.0 · 户型绘图工具</title>
 <style>
 :root{--bg:#f1f3f8;--ink:#222b38;--muted:#8792a6;--line:#e3e7ef;--blue:#4a7dff;--blue2:#eef3ff;--cyan:#2fb9d8;--green:#18a05f;--orange:#e6a23c;--shadow:0 2px 12px rgba(36,50,88,.08);--panel-bg:#ffffff;--panel-line:#e8ecf3;--page-grad:linear-gradient(180deg,#f5f7fb,#eef1f7);--topbar-bg:#ffffff;--topbar-line:#e3e7ef;--topbar-ink:#222b38;--topbar-shadow:0 2px 10px rgba(36,50,88,.05);--btn-bg:#ffffff;--btn-line:#e3e7ef;--btn-ink:#222b38;--btn-hover-bg:#f6f8fd;--btn-hover-line:#b9c8e6;--tab-btn-bg:#ffffff;--tab-btn-line:#e3e7ef;--tab-btn-ink:#222b38;--tab-hover-bg:#f5f8ff;--tab-hover-line:#b9c8e6;--hover-glow:none;--danger-ink:#d45555;--danger-line:#f0d9d9;--danger-bg:#ffffff;--danger-hover-bg:#fdf3f3;--danger-hover-line:#e0a4a4;--focus:#4a7dff;--chip-ink:#4a7dff;--title-ink:#41506b;--hairline:#eef1f6;--tool-hover-line:#a9bef0;--input-bg:#ffffff;--input-line:#dfe5ee;--focus-line:#4a7dff;--focus-ring:0 0 0 3px rgba(74,125,255,.14);--kbd-bg:#f0f3f8;--kbd-ink:#4a5872;--ph-ink:#a5b0c2;--soft-ink:#3c4a5c;--label-ink:#5a667c;--card-bg:#f7f9fc;--card-line:#e6eaf2;--card-dash:#cfdaec;--card-ink:#5a667c;--badge-bg:#e8f6ee;--badge-ink:#18a05f;--badge-line:#bfe4d0;--canvas-line:#e0e6ef;--canvas-shadow:0 6px 24px rgba(36,50,88,.10);--status-bg:#ffffff;--status-ink:#6b7890;--status-dim:#9aa5b8;--overlay-bg:rgba(30,40,60,.45);--modal-bg:#ffffff;--modal-line:#e6eaf2;--modal-ink:#5a667c;--warn-bg:#fff8e6;--warn-line:#ecd9a0;--warn-ink:#7a5c14;--overlay-soft:rgba(20,30,55,.40);--scroll-thumb:#d3dae6;--r3d-bg:rgba(240,243,248,.97);--r3d-bar-bg:#ffffff;--r3d-bar-line:#e3e7ef;--grid-on:0}
 html[data-theme="dark"]{--bg:#0a0f1a;--ink:#e6edf8;--muted:#8fa2bd;--line:#233350;--blue:#4d8dff;--blue2:#16263f;--cyan:#35d6c8;--green:#3ecf8e;--orange:#e8a34c;--shadow:0 10px 30px rgba(2,8,20,.55);--panel-bg:linear-gradient(180deg,rgba(19,29,50,.94),rgba(13,21,38,.94));--panel-line:#22345a;--page-grad:radial-gradient(1100px 520px at 15% -8%,rgba(64,118,255,.16),transparent 60%),radial-gradient(900px 480px at 100% 0%,rgba(53,214,200,.10),transparent 55%),linear-gradient(180deg,#0a0f1a,#0b1220);--topbar-bg:linear-gradient(180deg,#0e1730,#0a1224);--topbar-line:#1e2d4d;--topbar-ink:#ffffff;--topbar-shadow:0 6px 24px rgba(2,8,20,.45);--btn-bg:#131d31;--btn-line:#233350;--btn-ink:#e6edf8;--btn-hover-bg:#1a2842;--btn-hover-line:#3a567f;--tab-btn-bg:#131f36;--tab-btn-line:#2b3d60;--tab-btn-ink:#dfe9f8;--tab-hover-bg:#1b2a48;--tab-hover-line:#3fd6c8;--hover-glow:0 0 0 1px rgba(53,214,200,.22);--danger-ink:#ff9c9c;--danger-line:#4a2a35;--danger-bg:#1d1520;--danger-hover-bg:#2a1a22;--danger-hover-line:#8a3a4a;--focus:#35d6c8;--chip-ink:#8fb6ff;--title-ink:#c9d7ee;--hairline:#1c2a46;--tool-hover-line:#3fd6c8;--input-bg:#0d1526;--input-line:#2b3d60;--focus-line:#3fd6c8;--focus-ring:0 0 0 2px rgba(53,214,200,.16);--kbd-bg:#16223a;--kbd-ink:#cfe0f5;--ph-ink:#647c9e;--soft-ink:#b9c7dc;--label-ink:#93a5c1;--card-bg:#0e1830;--card-line:#22345a;--card-dash:#2c4066;--card-ink:#93a5c1;--badge-bg:#0f2a22;--badge-ink:#4fd8a4;--badge-line:#1e5241;--canvas-line:#2a3c60;--canvas-shadow:0 0 0 1px rgba(77,141,255,.10),0 14px 44px rgba(2,8,20,.5);--status-bg:#0d1526;--status-ink:#7f92b0;--status-dim:#5f7292;--overlay-bg:rgba(4,9,20,.72);--modal-bg:linear-gradient(180deg,#121c31,#0e1626);--modal-line:#26375a;--modal-ink:#93a5c1;--warn-bg:rgba(26,32,48,.95);--warn-line:#6b5a2a;--warn-ink:#ffd98a;--overlay-soft:rgba(4,9,20,.55);--scroll-thumb:#25365a;--r3d-bg:rgba(4,9,20,.9);--r3d-bar-bg:linear-gradient(180deg,#0e1730,#0a1224);--r3d-bar-line:#1e2d4d;--grid-on:1}
@@ -138,7 +138,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <body>
 <div class="app">
 <header class="topbar" id="topbar">
-  <div class="brand"><div class="brand-mark">R</div><div><strong>RoomSketch 2.0</strong><small>户型绘图 · 离线整合版</small></div></div>
+  <div class="brand"><div class="brand-mark">R</div><div><strong>RoomSketch 1.0.0</strong><small>户型绘图 · 离线单文件版</small></div></div>
   <button class="drawer-toggle" id="leftDrawerBtn">▦ 工具</button>
   <div class="top-actions" id="topActions">
     <button id="newBtn" title="新建空白画布">新建</button>
@@ -244,7 +244,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <button class="tool" data-tool="dimension"><span class="ico">↔</span>尺寸</button>
 <button class="tool" data-tool="pan"><span class="ico">✥</span>平移</button>
 </div>
-<footer class="statusbar"><span class="status" id="statusText">● 已就绪 · 数据仅保存在本机浏览器中</span><span id="dimensionsText">画布视图 12000 × 8000 mm</span><span id="selectionText">未选中对象</span><span class="rightstatus">RoomSketch 2.0 · Offline</span></footer>
+<footer class="statusbar"><span class="status" id="statusText">● 已就绪 · 数据仅保存在本机浏览器中</span><span id="dimensionsText">画布视图 12000 × 8000 mm</span><span id="selectionText">未选中对象</span><span id="saveState">○ 无未保存更改</span><span class="rightstatus">RoomSketch 1.0.0 · Offline</span></footer>
 
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 </div>
@@ -258,10 +258,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id), svgNS='http://www.w3.org/2000/svg', xlinkNS='http://www.w3.org/1999/xlink';
+const APP_VERSION='1.0.0', SCHEMA_VERSION=1; // 单一版本源：应用版本与工程 schemaVersion 分离
 const svg=$('canvas'), objectsG=$('objects'), draftG=$('draft'), uiG=$('selection-ui');
 function setSvgMode(mode){svg.setAttribute('class',mode);}
 let objects=[],selectedId=null,multiIds=[],tool='select',drawing=null,view={x:0,y:0,w:12000,h:8000},undoStack=[],redoStack=[],counter=1,pdfImported=false,pdfPageSize=null,calibratePts=[];
 let dragState=null,panState=null,lastPointer={x:0,y:0},marqueeMode=false,marqueeDrag=null,marqueeRect=null,marqueeIds=[];
+let booting=true; // 启动期间的首次 render 不算“未保存更改”，也不覆盖自动备份
 let customFurnLabel=null,lastTap={t:0,x:0,y:0},justFinished=0;
 const TOOL_NAMES={select:'选择 / 移动',wall:'墙体 / 折线',room:'多边形房间 / 面积',rect:'矩形区域',line:'辅助线',door:'门 / 开向弧线',window:'窗户',furniture:'桌柜 / 家具',label:'文字标注',dimension:'尺寸标注',pan:'平移画布',calibrate:'比例校准'};
 const presets={table:[1400,700,'桌子'],desk:[1200,600,'办公桌'],cabinet:[900,450,'柜子'],wardrobe:[1800,600,'衣柜'],bed:[2000,1500,'床'],sofa:[2100,850,'沙发'],chair:[500,500,'椅子'],roundtable:[1200,1200,'圆桌']};
@@ -296,7 +298,18 @@ function el(tag,attrs={},parent){const n=document.createElementNS(svgNS,tag);for
 // ---- geometry helpers ----
 function polyArea(pts){let a=0;for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length];a+=p[0]*q[1]-q[0]*p[1]}return Math.abs(a)/2}
 function polyCentroid(pts){let a=0,cx=0,cy=0;for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length];const f=p[0]*q[1]-q[0]*p[1];a+=f;cx+=(p[0]+q[0])*f;cy+=(p[1]+q[1])*f}if(Math.abs(a)<1e-6){const n=pts.length||1;return [pts.reduce((s,p)=>s+p[0],0)/n,pts.reduce((s,p)=>s+p[1],0)/n]}return [cx/(3*a),cy/(3*a)]}
-function objBounds(o){let xs=[],ys=[];if(o.points){for(const p of o.points){xs.push(p[0]);ys.push(p[1])}}else if(o.type==='dimension'){xs=[0,o.length||o.w||0];ys=[-70,40]}else{xs=[0,o.w||0];ys=[0,o.h||0];if(o.type==='door'||o.type==='window')ys=[0,(o.dir||1)*(o.w||0)]}let minx=Math.min(...xs)+(o.x||0),maxx=Math.max(...xs)+(o.x||0),miny=Math.min(...ys)+(o.y||0),maxy=Math.max(...ys)+(o.y||0);if(!isFinite(minx))return {x:o.x||0,y:o.y||0,w:100,h:100};let pad=(o.stroke||10)/2;return {x:minx-pad,y:miny-pad,w:Math.max(1,maxx-minx)+pad*2,h:Math.max(1,maxy-miny)+pad*2}}
+function objBounds(o){let xs=[],ys=[];if(o.points){for(const p of o.points){xs.push(p[0]);ys.push(p[1])}}else if(o.type==='dimension'){xs=[0,o.length||o.w||0];ys=[-70,40]}else{xs=[0,o.w||0];ys=[0,o.h||0];if(o.type==='door'||o.type==='window')ys=[0,(o.dir||1)*(o.w||0)]}
+let lx0=Math.min(...xs),lx1=Math.max(...xs),ly0=Math.min(...ys),ly1=Math.max(...ys);
+if(!isFinite(lx0))return {x:o.x||0,y:o.y||0,w:100,h:100};
+// 统一几何：先取局部包围盒，再按 rotation 绕对象原点旋转四个角，取轴对齐包围盒。
+// render() 用 translate(x,y) rotate(rotation) 绘制，包围盒必须用同一变换，
+// 否则选框 / 适合窗口 / 框选 / SVG-PNG 导出范围会与画面不一致。
+const ang=(o.rotation||0)*Math.PI/180, c=Math.cos(ang), sn=Math.sin(ang);
+const corners=[[lx0,ly0],[lx1,ly0],[lx1,ly1],[lx0,ly1]].map(([px,py])=>[(o.x||0)+px*c-py*sn,(o.y||0)+px*sn+py*c]);
+const cx=corners.map(q=>q[0]), cy=corners.map(q=>q[1]);
+const pad=(o.stroke||10)/2;
+const minx=Math.min(...cx)-pad, maxx=Math.max(...cx)+pad, miny=Math.min(...cy)-pad, maxy=Math.max(...cy)+pad;
+return {x:minx,y:miny,w:Math.max(1,maxx-minx),h:Math.max(1,maxy-miny)}}
 // ---- 家具 / 设备外观细节（按名称关键字绘制风格化平面图形） ----
 function furnKind(label){const s=label||'';if(/坐便器|马桶/.test(s))return 'toilet';if(/圆形浴缸/.test(s))return 'roundbath';if(/浴缸/.test(s))return 'bath';if(/立柱洗手盆|独立洗手盆|圆洗手盆/.test(s))return 'roundsink';if(/洗手盆|面盆/.test(s))return 'sink';if(/淋浴/.test(s))return 'shower';if(/冰箱/.test(s))return 'fridge';if(/灶台/.test(s))return 'stove';if(/洗衣机/.test(s))return 'washer';if(/圆桌|圆台面|圆形会议桌/.test(s))return 'roundtable';if(/圆床/.test(s))return 'roundbed';if(/圆凳|吧台凳/.test(s))return 'roundstool';if(/圆(形)?茶几|圆几/.test(s))return 'roundcoffee';if(/圆形地毯|圆毯/.test(s))return 'roundcarpet';if(/衣柜|文件柜|储物柜|电视柜|床头柜/.test(s))return 'wardrobe';if(/柜/.test(s))return 'cabinet';if(/床/.test(s))return 'bed';if(/沙发/.test(s))return 'sofa';if(/椅/.test(s))return 'chair';if(/楼梯/.test(s))return 'stairs';if(/绿植|植物|花坛/.test(s))return 'plant';if(/地毯/.test(s))return 'carpet';if(/屏风|隔断/.test(s))return 'screen';if(/桌|台/.test(s))return 'table';return 'box'}
 function furnBase(g,o,stroke,sw){const kind=furnKind(o.label);const ROUND=['roundtable','roundbed','roundstool','roundcoffee','roundbath','roundcarpet','roundsink','plant'];if(ROUND.includes(kind)){return el('ellipse',{cx:o.w/2,cy:o.h/2,rx:o.w/2,ry:o.h/2,fill:kind==='roundcarpet'?'none':'#e9eef5',stroke:stroke,'stroke-width':sw,'class':'main-shape'},g)}return el('rect',{x:0,y:0,width:o.w,height:o.h,rx:8,fill:'#e9eef5',stroke:stroke,'stroke-width':sw,'class':'main-shape'},g)}
@@ -341,7 +354,7 @@ function renderObj(o,parent){const g=el('g',{transform:`translate(${o.x||0} ${o.
   else if(o.type==='label'){main=el('text',{x:0,y:0,'font-size':o.fontSize||120,fill:stroke,'class':'main-shape'},g);main.textContent=o.label||'文字标注';}
   return g;
 }
-function render(){markDirty();objectsG.replaceChildren();const marqueeSet=new Set(marqueeIds);for(const o of objects){const g=renderObj(o,objectsG);if(marqueeSet.has(o.id))g.classList.add('marquee-selected');}const s=objects.find(o=>o.id===selectedId);uiG.replaceChildren();if(s){const b=objBounds(s);el('rect',{x:b.x-10,y:b.y-10,width:b.w+20,height:b.h+20,rx:4,class:'bbox'},uiG);
+function render(){if(!booting)markDirty();objectsG.replaceChildren();const marqueeSet=new Set(marqueeIds);for(const o of objects){const g=renderObj(o,objectsG);if(marqueeSet.has(o.id))g.classList.add('marquee-selected');}const s=objects.find(o=>o.id===selectedId);uiG.replaceChildren();if(s){const b=objBounds(s);el('rect',{x:b.x-10,y:b.y-10,width:b.w+20,height:b.h+20,rx:4,class:'bbox'},uiG);
   const canScale=['rect','furniture','imagebg','door','window','dimension'].includes(s.type)&&(!s.rotation||Math.abs(s.rotation%180)<0.01);
   const pxPerUnit=Math.max(view.w/Math.max(1,svg.clientWidth),view.h/Math.max(1,svg.clientHeight)),half=(svg.clientWidth<700?7:4.5)*pxPerUnit;
   if(canScale){const corners=[[b.x,b.y,'nw'],[b.x+b.w,b.y,'ne'],[b.x+b.w,b.y+b.h,'se'],[b.x,b.y+b.h,'sw']];corners.forEach(([x,y,c])=>el('rect',{x:x-half,y:y-half,width:half*2,height:half*2,rx:1,class:'handle','data-handle':'c:'+c},uiG));}
@@ -386,13 +399,7 @@ function updateMarqueeButtons(){
   del.textContent=`删除框选对象（${marqueeIds.length}）`;
   cancel.disabled=!marqueeMode&&!marqueeIds.length;
 }
-function selectionBounds(o){
-  const b=objBounds(o),ox=o.x||0,oy=o.y||0,ang=(o.rotation||0)*Math.PI/180;
-  if(!ang)return b;
-  const c=Math.cos(ang),sn=Math.sin(ang),corners=[[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]].map(([x,y])=>{const lx=x-ox,ly=y-oy;return {x:ox+lx*c-ly*sn,y:oy+lx*sn+ly*c}});
-  const xs=corners.map(p=>p.x),ys=corners.map(p=>p.y),x=Math.min(...xs),y=Math.min(...ys),r=Math.max(...xs),bt=Math.max(...ys);
-  return {x,y,w:r-x,h:bt-y};
-}
+function selectionBounds(o){return objBounds(o)} // objBounds 已含旋转，不再二次旋转
 function rectsIntersect(a,b){return a.x<=b.x+b.w&&a.x+a.w>=b.x&&a.y<=b.y+b.h&&a.y+a.h>=b.y}
 function rectContains(a,b){return b.x>=a.x&&b.y>=a.y&&b.x+b.w<=a.x+a.w&&b.y+b.h<=a.y+a.h}
 function updateMarqueeOverlay(){
@@ -494,7 +501,7 @@ $('zoomIn').onclick=()=>zoom(.8);$('zoomOut').onclick=()=>zoom(1.25);function zo
 $('fitBtn').onclick=fitView;function fitView(){if(!objects.length){view={x:0,y:0,w:12000,h:8000};render();return}let bs=objects.map(objBounds),x=Math.min(...bs.map(b=>b.x)),y=Math.min(...bs.map(b=>b.y)),r=Math.max(...bs.map(b=>b.x+b.w)),bt=Math.max(...bs.map(b=>b.y+b.h));let w=Math.max(100,r-x),h=Math.max(80,bt-y),pad=Math.max(w,h)*.12;const ar=svg.clientWidth/Math.max(1,svg.clientHeight);w+=pad*2;h+=pad*2;if(w/h<ar)w=h*ar;else h=w/ar;view={x:x-pad-(w-(r-x+2*pad))/2,y:y-pad-(h-(bt-y+2*pad))/2,w,h};render()}
 $('deleteBtn').onclick=deleteSelected;$('cleanPdfTextBtn').onclick=cleanPdfText;$('startMarqueeBtn').onclick=()=>{finishDraw(false);drawing=null;draftG.replaceChildren();marqueeMode=true;marqueeDrag=null;marqueeRect=null;marqueeIds=[];selectedId=null;setSvgMode('mode-marquee');render();updateInspector();updateCounts();$('marqueeInfo').textContent='请在图纸上按住鼠标左键拖动，框出要删除的区域。红色高亮代表将被删除的 PDF 线条。';setStatus('框选删除模式：拖动鼠标圈选 PDF 对象');updateMarqueeButtons()};$('deleteMarqueeBtn').onclick=deleteMarqueeSelection;$('cancelMarqueeBtn').onclick=cancelMarqueeSelection;$('clearBtn').onclick=()=>showModal(`<h3>清空整个画布？</h3><p>此操作会删除当前画布中的全部对象，包括 PDF 提取线条、墙体、门窗、家具和图片底图。可以通过撤销恢复。</p><div class="actions"><button id="cancelModal">取消</button><button id="confirmClear" class="primary">确认清空</button></div>`);
 $('newBtn').onclick=()=>showModal(`<h3>新建空白画布？</h3><p>当前未保存的绘图内容将被清除。建议先导出 SVG 或 PNG 备份。</p><div class="actions"><button id="cancelModal">取消</button><button id="confirmClear" class="primary">新建画布</button></div>`);
-function showModal(html){$('modalBox').innerHTML=html;$('modalBackdrop').style.display='flex';const c=$('cancelModal');if(c)c.onclick=closeModal;const ok=$('confirmClear');if(ok)ok.onclick=()=>{snapshot();objects=[];selectedId=null;marqueeMode=false;marqueeDrag=null;marqueeRect=null;marqueeIds=[];setSvgMode('mode-select');pdfImported=false;pdfPageSize=null;$('pdfBadge').style.display='none';$('pdfInfo').textContent='尚未导入 PDF。支持常见矢量 PDF 的线条和曲线路径提取；默认忽略纯填充路径，避免产生杂乱线条。扫描版 PDF 请先转为图片后使用“导入底图”。';view={x:0,y:0,w:12000,h:8000};closeModal();render();updateInspector();updateCounts();refreshPdfCleanupHint();setStatus('画布已清空')};}
+function showModal(html){$('modalBox').innerHTML=html;$('modalBackdrop').style.display='flex';const c=$('cancelModal');if(c)c.onclick=closeModal;const ok=$('confirmClear');if(ok)ok.onclick=()=>{snapshot();objects=[];selectedId=null;marqueeMode=false;marqueeDrag=null;marqueeRect=null;marqueeIds=[];setSvgMode('mode-select');pdfImported=false;pdfPageSize=null;$('pdfBadge').style.display='none';$('pdfInfo').textContent='尚未导入 PDF。支持常见矢量 PDF 的线条和曲线路径提取；默认忽略纯填充路径，避免产生杂乱线条。扫描版 PDF 请先转为图片后使用“导入底图”。';view={x:0,y:0,w:12000,h:8000};closeModal();render();updateInspector();updateCounts();refreshPdfCleanupHint();dirty=true;updateSaveState();setStatus('画布已清空')};}
 function closeModal(){$('modalBackdrop').style.display='none'}$('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal()});
 $('scaleSelect').onchange=()=>{$('scaleInfo').value='1 : '+$('scaleSelect').value};
 $('undoBtn').onclick=undo;$('redoBtn').onclick=redo;
@@ -515,7 +522,8 @@ $('drawerBackdrop').onclick=closeDrawers;
 $('openImgBtn').onclick=()=>$('imgFile').click();
 $('imgFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const url=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=url});const maxW=2200;let iw=img.naturalWidth,ih=img.naturalHeight;let scale=iw>maxW?maxW/iw:1;const c=document.createElement('canvas');c.width=Math.round(iw*scale);c.height=Math.round(ih*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const jpg=c.toDataURL('image/jpeg',.92);const w=svg.clientWidth?view.w*.8:8000;const h=w*(c.height/c.width);snapshot();objects.push({type:'imagebg',id:uid(),x:view.x+view.w*.1,y:view.y+view.h*.1,w,h,src:jpg,srcW:c.width,srcH:c.height,opacity:1});selectedId=objects[objects.length-1].id;render();updateInspector();updateCounts();setStatus('图片底图已导入，可作为扫描图描图参考');toast('图片底图已导入；可调整不透明度后描图')}catch(err){toast('图片导入失败：'+(err?.message||'未知错误'));setStatus('图片底图导入失败',false)}finally{e.target.value=''}};
 // ---- PDF import: compact parser for common vector-PDF content streams (no network dependency). ----
-$('openPdfBtn').onclick=()=>$('pdfFile').click();$('pdfFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;setStatus('正在解析 PDF，请稍候…');try{const buf=await f.arrayBuffer();const result=await parseVectorPDF(buf);if(!result.objects.length){toast('没有识别到矢量线条。该 PDF 可能是扫描图片（可截图后用“导入底图”）。');setStatus('PDF 中未发现可提取的矢量线条',false);return}snapshot();objects=result.objects.map(o=>({...o,id:uid(),x:o.x+100,y:o.y+100,pdfOrigin:true}));selectedId=null;marqueeMode=false;marqueeDrag=null;marqueeRect=null;marqueeIds=[];setSvgMode('mode-select');pdfImported=true;pdfPageSize=result.pageSize;$('pdfBadge').style.display='inline-block';$('pdfInfo').textContent=`已提取 ${result.objects.length} 个矢量对象；页面约 ${fmt(result.pageSize.w)} × ${fmt(result.pageSize.h)} mm。保留了 PDF 原始线条颜色，可使用“一键清除标注 / 文字”生成房间结构底图，也可手动框选删除。`;view={x:0,y:0,w:result.pageSize.w*1.25+200,h:result.pageSize.h*1.25+200};render();updateInspector();updateCounts();refreshPdfCleanupHint();setStatus(`PDF 导入完成：提取 ${result.objects.length} 条线段 / 路径`);toast(`已导入 ${result.objects.length} 个矢量路径`)}catch(err){console.error(err);setStatus('PDF 解析失败：'+err.message,false);toast('PDF 解析失败：'+(err?.message||'不支持的内容结构'))}finally{e.target.value=''}};
+$('openPdfBtn').onclick=()=>$('pdfFile').click();$('pdfFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;setStatus('正在解析 PDF，请稍候…');try{const buf=await f.arrayBuffer();const result=await parseVectorPDF(buf);if(!result.objects.length){toast('没有识别到矢量线条。该 PDF 可能是扫描图片（可截图后用“导入底图”）。');setStatus('PDF 中未发现可提取的矢量线条',false);return}snapshot();objects=result.objects.map(o=>({...o,id:uid(),x:o.x+100,y:o.y+100,pdfOrigin:true}));selectedId=null;marqueeMode=false;marqueeDrag=null;marqueeRect=null;marqueeIds=[];setSvgMode('mode-select');pdfImported=true;pdfPageSize=result.pageSize;$('pdfBadge').style.display='inline-block';$('pdfInfo').textContent=`已提取 ${result.objects.length} 个矢量对象；页面约 ${fmt(result.pageSize.w)} × ${fmt(result.pageSize.h)} mm。保留了 PDF 原始线条颜色，可使用“一键清除标注 / 文字”生成房间结构底图，也可手动框选删除。${(result.warnings||[]).length?'注意：'+result.warnings.join('；')+'。':''}`;
+if((result.warnings||[]).length)toast(result.warnings.join('；'));view={x:0,y:0,w:result.pageSize.w*1.25+200,h:result.pageSize.h*1.25+200};render();updateInspector();updateCounts();refreshPdfCleanupHint();setStatus(`PDF 导入完成：提取 ${result.objects.length} 条线段 / 路径`);toast(`已导入 ${result.objects.length} 个矢量路径`)}catch(err){console.error(err);setStatus('PDF 解析失败：'+err.message,false);toast('PDF 解析失败：'+(err?.message||'不支持的内容结构'))}finally{e.target.value=''}};
 // PDF markup cleaner: identify the connected architectural drawing, then remove
 // annotation layers (text, leaders, page frame, compass/isolated markers).
 function pdfMetrics(o){
@@ -612,14 +620,18 @@ function cleanPdfText(){
   if(!pdfImported){toast('请先导入 PDF');return}
   const result=detectPdfMarkup();
   if(!result.count){toast('未发现可安全自动清理的标注；可使用框选删除');return}
-  const remove=new Set(result.ids),oldCount=objects.length;
-  snapshot();objects=objects.filter(o=>!remove.has(o.id));
-  marqueeIds=[];if(!marqueeIds.length)marqueeRect=null;
-  if(selectedId&&remove.has(selectedId))selectedId=null;
-  render();updateInspector();updateCounts();refreshPdfCleanupHint();fitPdfObjectsTight();
-  const removed=oldCount-objects.length;
-  setStatus(`已清理 ${removed} 个标注 / 文字对象，保留主要房间结构`);
-  toast(`已清除 ${removed} 个标注 / 文字对象；可按 Ctrl+Z 撤销`);
+  const d=result.details;
+  showModal(`<h3>确认清理标注 / 文字？</h3><p>将删除 <b>${result.count}</b> 个矢量对象：黑色文字/引线 ${d.removedBlack||0}，页面边框 ${d.removedFrame||0}，主体外标记 ${d.removedOutside||0}，小型文字簇 ${d.removedGlyph||0}。主要房间结构会保留，清理后可按 Ctrl+Z 撤销。</p><div class="actions"><button id="cancelModal">取消</button><button id="confirmCleanPdf" class="primary">确认清理（${result.count}）</button></div>`);
+  $('confirmCleanPdf').onclick=()=>{
+    const remove=new Set(result.ids),oldCount=objects.length;
+    snapshot();objects=objects.filter(o=>!remove.has(o.id));
+    marqueeIds=[];if(!marqueeIds.length)marqueeRect=null;
+    if(selectedId&&remove.has(selectedId))selectedId=null;
+    closeModal();render();updateInspector();updateCounts();refreshPdfCleanupHint();fitPdfObjectsTight();
+    const removed=oldCount-objects.length;
+    setStatus(`已清理 ${removed} 个标注 / 文字对象，保留主要房间结构`);
+    toast(`已清除 ${removed} 个标注 / 文字对象；可按 Ctrl+Z 撤销`);
+  };
 }
 async function parseVectorPDF(buffer){const bytes=new Uint8Array(buffer);let raw=latin1(bytes);const objs=new Map();
   function addObjects(src){const re=/(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g;let m;while((m=re.exec(src))){const id=Number(m[1]),body=m[3];let stream=null,dict=body;const sm=/\bstream\r?\n([\s\S]*?)\r?\n?endstream/.exec(body);if(sm){dict=body.slice(0,sm.index);stream=latin1(strToBytes(sm[1]))}objs.set(id,{id,dict,stream,decoded:null})}}
@@ -627,7 +639,11 @@ async function parseVectorPDF(buffer){const bytes=new Uint8Array(buffer);let raw
   for(const ob of [...objs.values()])if(ob.stream!==null&&/\/Type\s*\/ObjStm\b/.test(ob.dict)){try{const d=await decodeStream(ob);const n=Number((ob.dict.match(/\/N\s+(\d+)/)||[])[1]||0),first=Number((ob.dict.match(/\/First\s+(\d+)/)||[])[1]||0);const head=d.slice(0,first).trim().split(/\s+/).map(Number);for(let i=0;i<n;i++){const off=first+(head[i*2+1]||0),end=i===n-1?d.length:first+(head[(i+1)*2+1]||0);objs.set(head[i*2],{id:head[i*2],dict:d.slice(off,end).trim(),stream:null,decoded:null})}}catch(e){}}
   const pages=[...objs.values()].filter(o=>/\/Type\s*\/Page\b/.test(o.dict)&&!/\/Type\s*\/Pages\b/.test(o.dict));if(!pages.length)throw Error('找不到 PDF 页面对象');const page=pages[0];let mb=(page.dict.match(/\/MediaBox\s*\[([^\]]+)\]/)||[])[1];if(!mb){let par=Number((page.dict.match(/\/Parent\s+(\d+)\s+\d+\s+R/)||[])[1]);while(par&&objs.has(par)&&!mb){const pd=objs.get(par).dict;mb=(pd.match(/\/MediaBox\s*\[([^\]]+)\]/)||[])[1];par=Number((pd.match(/\/Parent\s+(\d+)\s+\d+\s+R/)||[])[1])}}if(!mb)mb='0 0 612 792';const [x0,y0,x1,y1]=mb.trim().split(/\s+/).map(Number);const pageW=x1-x0,pageH=y1-y0;
   const cText=(page.dict.match(/\/Contents\s*(\[[\s\S]*?\]|\d+\s+\d+\s+R)/)||[])[1]||'';const refs=[...cText.matchAll(/(\d+)\s+\d+\s+R/g)].map(m=>Number(m[1]));if(!refs.length)throw Error('页面没有可读取的内容流');let streamText='';for(const id of refs){const ob=objs.get(id);if(ob?.stream!==null&&ob){try{streamText+=await decodeStream(ob)+'\n'}catch(e){}}}
-  const parsed=parseContentPaths(streamText,[x0,y0,x1,y1]);const pts=parsed.flatMap(o=>o.points);if(!pts.length)return {objects:[],pageSize:{w:pageW*.352778,h:pageH*.352778}};const factor=.352778;let results=[];for(const p of parsed){let points=p.points.map(([x,y])=>[(x-x0)*factor,(y1-y)*factor]);if(points.length>=2){const pdfColor='#'+(p.strokeColor||[0.40,0.46,0.54]).map(v=>Math.round(Math.max(0,Math.min(1,v))*255).toString(16).padStart(2,'0')).join('');results.push({type:'pdf',x:0,y:0,points,stroke:Math.max(0.15,Math.min(3,p.width*factor)),strokeColor:pdfColor,pdfStrokeColor:pdfColor,closed:p.closed})}}return {objects:results,pageSize:{w:pageW*factor,h:pageH*factor}};
+  const pageCount=pages.length;
+  const warnings=[];
+  if(pageCount>1)warnings.push(`多页 PDF（共 ${pageCount} 页），本次仅导入第 1 页`);
+  if(/\/Subtype\s*\/Form/.test(raw))warnings.push('包含 Form XObject，其中矢量未提取');
+  const parsed=parseContentPaths(streamText,[x0,y0,x1,y1]);const pts=parsed.flatMap(o=>o.points);if(!pts.length)return {objects:[],pageSize:{w:pageW*.352778,h:pageH*.352778},pageCount,warnings};const factor=.352778;let results=[];for(const p of parsed){let points=p.points.map(([x,y])=>[(x-x0)*factor,(y1-y)*factor]);if(points.length>=2){const pdfColor='#'+(p.strokeColor||[0.40,0.46,0.54]).map(v=>Math.round(Math.max(0,Math.min(1,v))*255).toString(16).padStart(2,'0')).join('');results.push({type:'pdf',x:0,y:0,points,stroke:Math.max(0.15,Math.min(3,p.width*factor)),strokeColor:pdfColor,pdfStrokeColor:pdfColor,closed:p.closed})}}return {objects:results,pageSize:{w:pageW*factor,h:pageH*factor},pageCount,warnings};
 }
 function latin1(u){let s='';const step=0x8000;for(let i=0;i<u.length;i+=step)s+=String.fromCharCode(...u.subarray(i,Math.min(i+step,u.length)));return s}
 function strToBytes(s){const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i)&255;return a}
@@ -687,14 +703,22 @@ function parseContentPaths(src,mb){
 // ---- project save / open ----
 $('saveProjectBtn').onclick=saveProject;
 $('openProjectBtn').onclick=()=>$('projectFile').click();
-$('projectFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const data=JSON.parse(await f.text());if(data.app!=='RoomSketch'||!Array.isArray(data.objects))throw Error('工程文件格式不正确');if(!data.objects.every(o=>o&&typeof o==='object'&&typeof o.type==='string'))throw Error('工程对象数据异常');snapshot();objects=data.objects.map(o=>({...o,id:typeof o.id==='string'?o.id:uid()}));counter=Math.max(counter,Number(data.counter)||1);selectedId=null;marqueeMode=false;marqueeDrag=null;marqueeRect=null;marqueeIds=[];setSvgMode('mode-select');pdfImported=!!data.pdfImported;pdfPageSize=data.pdfPageSize||null;if(data.view&&['x','y','w','h'].every(k=>Number.isFinite(Number(data.view[k]))))view={x:Number(data.view.x),y:Number(data.view.y),w:Math.max(1,Number(data.view.w)),h:Math.max(1,Number(data.view.h))};$('scaleSelect').value=String(data.scale||50);$('scaleInfo').value='1 : '+$('scaleSelect').value;$('pdfBadge').style.display=pdfImported?'inline-block':'none';$('pdfInfo').textContent=pdfImported?'工程文件包含已导入的 PDF 矢量路径。':'尚未导入 PDF。';render();updateInspector();updateCounts();refreshPdfCleanupHint();setStatus('工程文件已打开');toast(`已载入 ${objects.length} 个对象`)}catch(err){toast('打开失败：'+err.message);setStatus('工程文件载入失败',false)}finally{e.target.value=''}};
-function saveProject(){const data={app:'RoomSketch',version:2,savedAt:new Date().toISOString(),counter,objects,view,scale:Number($('scaleSelect').value)||50,pdfImported,pdfPageSize};download(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}),'RoomSketch-工程.json');toast('可继续编辑的工程文件已保存')}
+$('projectFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const data=JSON.parse(await f.text());if(!Array.isArray(data.objects))throw Error('工程文件格式不正确');
+const isNew=data.format==='roomsketch',isOld=data.app==='RoomSketch';
+if(!isNew&&!isOld)throw Error('工程文件格式不正确');
+if(isNew&&data.schemaVersion&&data.schemaVersion!==SCHEMA_VERSION)throw Error(`工程格式版本 ${data.schemaVersion} 不受支持（本版本支持 ${SCHEMA_VERSION}）`);
+if(isOld)toast('已打开旧版工程文件，保存时将升级为 1.0.0 格式');if(!data.objects.every(o=>o&&typeof o==='object'&&typeof o.type==='string'))throw Error('工程对象数据异常');snapshot();objects=data.objects.map(o=>({...o,id:typeof o.id==='string'?o.id:uid()}));counter=Math.max(counter,Number(data.counter)||1);selectedId=null;marqueeMode=false;marqueeDrag=null;marqueeRect=null;marqueeIds=[];setSvgMode('mode-select');pdfImported=!!data.pdfImported;pdfPageSize=data.pdfPageSize||null;if(data.view&&['x','y','w','h'].every(k=>Number.isFinite(Number(data.view[k]))))view={x:Number(data.view.x),y:Number(data.view.y),w:Math.max(1,Number(data.view.w)),h:Math.max(1,Number(data.view.h))};$('scaleSelect').value=String(data.scale||50);$('scaleInfo').value='1 : '+$('scaleSelect').value;$('pdfBadge').style.display=pdfImported?'inline-block':'none';$('pdfInfo').textContent=pdfImported?'工程文件包含已导入的 PDF 矢量路径。':'尚未导入 PDF。';lastSavedAt=data.metadata?.updatedAt||data.metadata?.createdAt||data.savedAt||null;dirty=false;updateSaveState();
+render();updateInspector();updateCounts();refreshPdfCleanupHint();setStatus('工程文件已打开');toast(`已载入 ${objects.length} 个对象`)}catch(err){toast('打开失败：'+err.message);setStatus('工程文件载入失败',false)}finally{e.target.value=''}};
+function saveProject(){const now=new Date().toISOString();const data={format:'roomsketch',schemaVersion:SCHEMA_VERSION,appVersion:APP_VERSION,metadata:{name:'RoomSketch 工程',createdAt:lastSavedAt||now,updatedAt:now},counter,objects,view,scale:Number($('scaleSelect').value)||50,pdfImported,pdfPageSize};lastSavedAt=now;download(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}),'RoomSketch-1.0.0-工程.json');dirty=false;updateSaveState('已导出工程文件 · 请确认浏览器下载完成');toast('工程文件已导出，请确认浏览器下载完成')}
 // ---- auto backup ----
 const BK_KEY='roomsketch-autobackup-v2';let bkTimer=null;
-function markDirty(){clearTimeout(bkTimer);bkTimer=setTimeout(saveBackup,900)}
-function saveBackup(){try{localStorage.setItem(BK_KEY,JSON.stringify({at:Date.now(),objects,view,scale:$('scaleSelect').value,pdfImported,pdfPageSize,counter}))}catch(e){}}
+let dirty=false,lastSavedAt=null,bkFailed=false,bkFailNotified=false;
+function updateSaveState(msg){const el=$('saveState');if(!el)return;if(msg){el.textContent=msg;return}
+el.textContent=bkFailed?'⚠ 自动备份失败：浏览器存储不可用，请立即导出工程文件':dirty?'● 未保存更改 · 仅浏览器备份':'○ 无未保存更改'}
+function markDirty(){dirty=true;updateSaveState();clearTimeout(bkTimer);bkTimer=setTimeout(saveBackup,900)}
+function saveBackup(){if(!dirty)return;try{localStorage.setItem(BK_KEY,JSON.stringify({format:'roomsketch',schemaVersion:SCHEMA_VERSION,appVersion:APP_VERSION,at:Date.now(),objects,view,scale:$('scaleSelect').value,pdfImported,pdfPageSize,counter}));bkFailed=false;bkFailNotified=false;updateSaveState()}catch(e){bkFailed=true;updateSaveState();if(!bkFailNotified){bkFailNotified=true;toast('自动备份失败：浏览器存储不可用，请立即导出工程文件保存')}}}
 window.addEventListener('beforeunload',saveBackup);
-(function checkBackup(){try{const raw=localStorage.getItem(BK_KEY);if(!raw)return;const d=JSON.parse(raw);if(!d?.objects?.length)return;const t=new Date(d.at);$('restoreText').textContent=`检测到 ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')} 的自动备份（${d.objects.length} 个对象），是否恢复？`;$('restoreBar').style.display='flex';$('restoreYes').onclick=()=>{objects=d.objects.map(o=>({...o,id:typeof o.id==='string'?o.id:uid()}));counter=Math.max(counter,Number(d.counter)||1);pdfImported=!!d.pdfImported;pdfPageSize=d.pdfPageSize||null;if(d.view)view={x:d.view.x,y:d.view.y,w:d.view.w,h:d.view.h};$('scaleSelect').value=String(d.scale||50);$('scaleInfo').value='1 : '+$('scaleSelect').value;$('pdfBadge').style.display=pdfImported?'inline-block':'none';$('restoreBar').style.display='none';render();updateInspector();updateCounts();refreshPdfCleanupHint();setStatus('已恢复自动备份');toast('自动备份已恢复')};$('restoreNo').onclick=()=>{$('restoreBar').style.display='none'}}catch(e){}})();
+(function checkBackup(){try{const raw=localStorage.getItem(BK_KEY);if(!raw)return;const d=JSON.parse(raw);if(!d?.objects?.length)return;const t=new Date(d.at);$('restoreText').textContent=`检测到 ${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')} 的自动备份（${d.objects.length} 个对象），是否恢复？缓存备份不是正式工程文件，恢复后请另存为工程文件。`;$('restoreBar').style.display='flex';$('restoreYes').onclick=()=>{objects=d.objects.map(o=>({...o,id:typeof o.id==='string'?o.id:uid()}));counter=Math.max(counter,Number(d.counter)||1);pdfImported=!!d.pdfImported;pdfPageSize=d.pdfPageSize||null;if(d.view)view={x:d.view.x,y:d.view.y,w:d.view.w,h:d.view.h};$('scaleSelect').value=String(d.scale||50);$('scaleInfo').value='1 : '+$('scaleSelect').value;$('pdfBadge').style.display=pdfImported?'inline-block':'none';$('restoreBar').style.display='none';dirty=true;updateSaveState();render();updateInspector();updateCounts();refreshPdfCleanupHint();setStatus('已恢复自动备份');toast('自动备份已恢复')};$('restoreNo').onclick=()=>{$('restoreBar').style.display='none'}}catch(e){}})();
 // ---- export ----
 $('exportBtn').onclick=showExportDialog;
 function exportRect(scope){if(scope==='all'&&objects.length){const bs=objects.map(objBounds);const x=Math.min(...bs.map(b=>b.x)),y=Math.min(...bs.map(b=>b.y)),r=Math.max(...bs.map(b=>b.x+b.w)),bt=Math.max(...bs.map(b=>b.y+b.h));const pad=Math.max(r-x,bt-y)*.04+50;return {x:x-pad,y:y-pad,w:(r-x)+pad*2,h:(bt-y)+pad*2}}return {x:view.x,y:view.y,w:view.w,h:view.h}}
@@ -813,12 +837,15 @@ function r3dCollect(){const floors=[],walls=[],items=[];for(const o of objects){
 function r3dShade(a,b,rgb){const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1;const nx=dy/l,ny=-dx/l;const dot=Math.abs(nx*0.7+ny*0.7);const br=0.52+0.48*dot;return `rgb(${rgb.map(c=>Math.round(c*br)).join(',')})`}
 function r3dOpen(){
  if(!objects.length){toast('画布为空，没有可预览的内容');return}
+ const data=r3dCollect();
+ if(!data.floors.length&&!data.walls.length&&!data.items.length){toast('画布中没有可生成 3D 的对象（需要墙体 / 房间 / 家具）');return}
+ // 先算好可渲染对象再建遮罩层：以前先建层后判断，无可渲染对象时会留下一个关不掉的空白遮罩。
+ const unsupported={};for(const o of objects){if(!['polyroom','wall','furniture','window'].includes(o.type))unsupported[o.type]=(unsupported[o.type]||0)+1}
+ const unsupportedText=Object.keys(unsupported).length?` · 未在 3D 中显示：${Object.entries(unsupported).map(([t,n])=>`${({door:'门',rect:'矩形',line:'辅助线',polyline:'折线',pdf:'PDF线条',label:'文字',dimension:'尺寸标注',imagebg:'图片底图'}[t]||t)}×${n}`).join('、')}`:'';
  const back=document.createElement('div');back.className='r3d-backdrop open';
- back.innerHTML='<div class="r3d-bar"><strong>⫯ 3D 整体预览</strong><span class="r3d-hint">拖拽旋转 · 滚轮缩放 · Esc 关闭</span><span class="r3d-sp"></span><button id="r3dReset">重置视角</button><button id="r3dClose" class="primary">关闭</button></div><div class="r3d-wrap"><canvas class="r3d-canvas"></canvas></div>';
+ back.innerHTML='<div class="r3d-bar"><strong>⫯ 3D 整体预览</strong><span class="r3d-hint">拖拽旋转 · 滚轮缩放 · Esc 关闭'+unsupportedText+'</span><span class="r3d-sp"></span><button id="r3dReset">重置视角</button><button id="r3dClose" class="primary">关闭</button></div><div class="r3d-wrap"><canvas class="r3d-canvas"></canvas></div>';
  document.body.appendChild(back);
  const cv=back.querySelector('.r3d-canvas'),ctx=cv.getContext('2d');
- const data=r3dCollect();
- if(!data.floors.length&&!data.walls.length&&!data.items.length){toast("画布中没有可生成 3D 的对象（需要墙体 / 房间 / 家具）");return}
  const st={yaw:35*Math.PI/180,pitch:32*Math.PI/180,zoom:1};
  let xs=[],ys=[];for(const arr of [...data.floors.map(f=>f.pts),...data.walls.map(w=>w.pts),...data.items.map(i=>i.pts)])for(const p of arr){xs.push(p[0]);ys.push(p[1])}
  const cx=(Math.min(...xs)+Math.max(...xs))/2,cy=(Math.min(...ys)+Math.max(...ys))/2;
@@ -879,12 +906,12 @@ let rsTheme='dark';try{rsTheme=localStorage.getItem('rs-theme')||'light'}catch(e
 applyTheme(rsTheme);
 $('themeBtn').onclick=()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 // ---- 移动端布局：文件操作移入工具抽屉 ----
-const mqMobile=window.matchMedia('(max-width:640px)');
+const mqMobile=window.matchMedia?window.matchMedia('(max-width:640px)'): {matches:false,addEventListener(){},addListener(){}}; // 无 matchMedia 的环境（如测试）下不中断启动
 function relayoutMobile(){const ta=$('topActions');if(!ta)return;if(mqMobile.matches){const lp=$('leftPanel');if(ta.parentElement!==lp)lp.insertBefore(ta,lp.firstChild)}else{const tb2=$('topbar');if(ta.parentElement!==tb2)tb2.insertBefore(ta,$('rightDrawerBtn'))}}
 if(mqMobile.addEventListener)mqMobile.addEventListener('change',relayoutMobile);else if(mqMobile.addListener)mqMobile.addListener(relayoutMobile);
 relayoutMobile();
 // Initialize
-updateUndoButtons();updateCounts();updateInspector();render();
+updateUndoButtons();updateCounts();updateInspector();render();booting=false;dirty=false;updateSaveState();
 // read-only debug hook (for automated tests)
 window.__rs={get objects(){return objects},get selectedId(){return selectedId},get view(){return view},get counter(){return counter},get undoDepth(){return undoStack.length},get tool(){return tool},get drawing(){return drawing?{kind:drawing.kind,n:drawing.points?.length}:null},get lastTap(){return lastTap},get justFinished(){return justFinished}};
 })();
