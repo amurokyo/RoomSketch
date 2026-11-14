@@ -1,4 +1,4 @@
-# RoomSketch 2.0
+# RoomSketch 1.0.0
 
 > 纯离线 · 单文件 · 户型绘图工具
 > 户型绘制 / 家具图库 / 3D 预览 / 移动端适配 / 深浅双主题
@@ -49,7 +49,11 @@ python3 -m http.server 8080
 
 ## 📦 版本
 
-- **v1.0.0** · 2026-11-14 · 首个公开发布
+- **v1.0.0** · 2026-11-15 · 首个正式公开发行版本
+
+> RoomSketch 1.0.0 为项目首个正式公开发行版本。此前所有版本均为内部开发和测试版本，不构成正式发行版本。
+
+应用版本（`1.0.0`）与工程文件格式版本（`schemaVersion: 1`）分离：工程文件见 `format: "roomsketch"`，旧版 `{app: "RoomSketch", version: 2}` 工程仍可打开，保存时自动升级为 1.0.0 格式。
 
 ## 🛠 技术特点
 
@@ -57,6 +61,17 @@ python3 -m http.server 8080
 - SVG 绘图画布 + Canvas 2D 3D 轴测渲染器（画家算法）
 - 纯原生 JS（ES6+），全部逻辑本地运行，**不发起任何网络请求**
 
+## ✅ 测试
+
+```bash
+node tests/test-bounds.mjs      # 旋转包围盒单测，无需依赖
+node tests/check-offline.mjs    # 离线与版本一致性检查，无需依赖
+# 以下两项需 jsdom：
+npm install --no-save jsdom
+node tests/smoke.mjs            # 页面加载冒烟（file:// 语义）
+node tests/test-project-io.mjs  # 工程文件新旧格式兼容与非法文件拒绝
+```
+
 ## 📄 许可
 
-© 2026 [amurokyo](https://github.com/amurokyo) · 仅供学习交流使用
+© 2026 [amurokyo](https://github.com/amurokyo) · MIT 许可证，详见 [LICENSE](LICENSE)

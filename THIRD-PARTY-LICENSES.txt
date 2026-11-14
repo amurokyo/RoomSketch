@@ -1,0 +1,13 @@
+RoomSketch 1.0.0 — 第三方组件及许可证清单
+
+本产品为零依赖单文件应用：不包含任何第三方 JavaScript 库、CSS 框架、
+字体文件、图标包或 CDN 资源。全部界面、绘图、PDF 解析、PDF 导出与
+3D 轴测渲染代码均为项目自有代码，随本仓库 LICENSE（MIT）发布。
+
+核查方法：构建后扫描 index.html / RoomSketch-1.0.0.html，
+无外部 <script>、<link>、@import、url(http)、fetch、在线字体或图片引用
+（xmlns / xlink 命名空间 URI 仅为 XML 标识符，不发起网络请求）。
+
+第三方组件：无。
+
+本产品自有代码许可证：MIT License，见仓库根目录 LICENSE。
