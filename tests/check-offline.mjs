@@ -47,5 +47,17 @@ check('启动首次渲染不算未保存更改', html.includes('if(!booting)mark
 check('无更改时不写备份（不覆盖可恢复备份）', html.includes('function saveBackup(){if(!dirty)return;'));
 check('无 matchMedia 时不中断启动', html.includes("window.matchMedia?window.matchMedia"));
 
+// 5. 门窗与墙体关联（阶段三）
+check('创建门窗时存 wallId/seg/t', html.includes('wallId:wsnap.wallId,wallSeg:wsnap.seg,wallT:wsnap.t'));
+check('snapToWall 返回 wallId/seg/t', html.includes('wallId:o.id,seg:i,t}'));
+check('墙移动/改形后同步门窗', html.includes('syncWallOpenings(o)') || html.includes('syncWallOpenings(mob)'));
+check('删墙后门窗脱离', html.includes('detachWallOpenings(wid)'));
+check('打开/恢复时校验关联', (html.match(/normalizeOpenings\(\);/g) || []).length >= 2);
+check('未关联门窗有待关联虚线框', html.includes("class:'unlinked'"));
+check('门窗重新贴墙按钮', html.includes('id="reattachAllBtn"'));
+check('3D 墙段按开口切分', html.includes('wallSeg===i') && html.includes('DOOR_H=2100'));
+check('3D 未关联窗单独成块', html.includes("o.type==='window'&&!o.wallId"));
+check('3D 已关联门不算未显示', html.includes("o.type==='door'&&!!o.wallId"));
+
 if (failures) { console.error(`${failures} 项检查失败`); process.exit(1); }
 console.log('全部通过');
