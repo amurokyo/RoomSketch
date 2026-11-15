@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 统一几何模块（文档 §6.2）
+// RoomSketch 2.0.1 — 统一几何模块（文档 §6.2）
 // 与 1.0.0 的 objBounds 完全同一套数学：先取局部包围盒，再按 rotation
 // 绕对象原点旋转四个角，取轴对齐包围盒。render() 用 translate(x,y)
 // rotate(rotation) 绘制，包围盒必须用同一变换，否则选框 / 适合窗口 /

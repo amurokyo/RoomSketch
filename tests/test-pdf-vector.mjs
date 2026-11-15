@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — PDF.js 矢量提取测试
+// RoomSketch 2.0.1 — PDF.js 矢量提取测试
 // 用法：node tests/test-pdf-vector.mjs
 // 覆盖：多页文档加载、逐页信息（尺寸/矢量数/Form 标记）、
 // 第 1 页矢量提取（含 Form XObject 内容）、贝塞尔展平 v/y 正确性

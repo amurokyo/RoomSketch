@@ -1,9 +1,9 @@
-# RoomSketch 2.0.0
+# RoomSketch 2.0.1
 
 > 纯离线 · 单文件 · 户型绘图工具
 > 户型绘制 / 家具图库 / Three.js 3D 预览 / PDF 多页导入 / 移动端适配 / 深浅双主题
 
-一个**单 HTML 文件**的户型平面图绘制工具。无需安装、无需联网、无任何外部 CDN —— 把 `RoomSketch-2.0.0.html` 存到本地双击打开即可使用，也可以直接扔进 U 盘或内网共享给同事。
+一个**单 HTML 文件**的户型平面图绘制工具。无需安装、无需联网、无任何外部 CDN —— 把 `RoomSketch-2.0.1.html` 存到本地双击打开即可使用，也可以直接扔进 U 盘或内网共享给同事。
 
 ## ✨ 功能特性
 
@@ -41,7 +41,7 @@
 
 ```bash
 # 无需构建，任选其一：
-# 1. 直接双击打开 RoomSketch-2.0.0.html
+# 1. 直接双击打开 RoomSketch-2.0.1.html
 # 2. 或本地起个静态服务
 python3 -m http.server 8080
 ```
@@ -50,10 +50,11 @@ python3 -m http.server 8080
 
 ## 📦 版本
 
+- **v2.0.1** · 2026-11-15 · 划线预览冻结修复（见 CHANGELOG）
 - **v2.0.0** · 2026-11-15 · Vue 3 + PDF.js + Three.js 重构版（见 CHANGELOG）
 - **v1.0.0** · 2026-11-15 · 首个正式公开发行版本（零依赖单文件，Canvas 2D 轴测）
 
-应用版本（`2.0.0`）与工程文件格式版本（`schemaVersion: 1`）分离：工程文件见 `format: "roomsketch"`。旧版 `{app: "RoomSketch", version: 2}` 工程与 1.0.0 工程均可打开，保存时自动升级为 2.0.0 格式；不支持的 `schemaVersion` 会明确报错，不再静默忽略。1.0.0 的自动备份（同 localStorage key）也可在 2.0.0 启动时确认恢复。
+应用版本（`2.0.1`）与工程文件格式版本（`schemaVersion: 1`）分离：工程文件见 `format: "roomsketch"`。旧版 `{app: "RoomSketch", version: 2}` 工程与 1.0.0 工程均可打开，保存时自动升级为 2.0.1 格式；不支持的 `schemaVersion` 会明确报错，不再静默忽略。1.0.0 的自动备份（同 localStorage key）也可在 2.0.1 启动时确认恢复。
 
 ## 🛠 技术特点
 
@@ -65,7 +66,7 @@ python3 -m http.server 8080
 
 ```bash
 npm test            # 全部测试：几何/模型/PDF 矢量/三维/导出/保存兼容/离线/版本一致性/jsdom 端到端
-# 实浏验证（需 headless Chromium，见 ACCEPTANCE-2.0.0.md）：
+# 实浏验证（需 headless Chromium，见 ACCEPTANCE-2.0.1.md）：
 node /tmp/rs-browser/check-file.mjs      # file:// 冒烟
 node /tmp/rs-browser/check-stage5.mjs    # 3D 实渲 + PNG/SVG/PDF 导出下载
 node /tmp/rs-browser/check-offline.mjs   # 浏览器级断网启动与运行

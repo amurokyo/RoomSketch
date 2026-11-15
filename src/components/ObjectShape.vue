@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.0 — 单个对象渲染（移植 1.0.0 renderObj） -->
+<!-- RoomSketch 2.0.1 — 单个对象渲染（移植 1.0.0 renderObj） -->
 <template>
   <g :transform="`translate(${o.x || 0} ${o.y || 0})${o.rotation ? ` rotate(${o.rotation})` : ''}`" :data-id="o.id" :data-type="o.type">
     <!-- 墙体 -->
@@ -58,14 +58,17 @@ import { polyArea, polyCentroid } from '../model/geometry.ts';
 import { furnBaseShapes, furnDetailShapes } from '../model/furnitureRender.ts';
 
 const props = defineProps<{ o: RsObject }>();
-const o = props.o;
-const stroke = computed(() => o.strokeColor || (o.type === 'pdf' ? '#65758a' : '#27384a'));
-const sw = computed(() => o.stroke || 12);
-const dir = computed(() => (o.type === 'door' ? (o.dir || 1) : 1));
-const len = computed(() => (o.type === 'dimension' ? (o.length || o.w || 0) : 0));
-const centroid = computed(() => (o.type === 'polyroom' ? polyCentroid(o.points) : [0, 0]));
-const furnBase = computed(() => (o.type === 'furniture' ? furnBaseShapes(o.label, o.w, o.h, stroke.value, sw.value) : []));
-const furnDetail = computed(() => (o.type === 'furniture' ? furnDetailShapes(o.label, o.w, o.h, stroke.value, sw.value) : []));
+// 注意：父组件会用新对象替换 props.o（绘制预览每帧、撤销/重做、打开工程都会换对象）。
+// 直接 `const o = props.o` 只在挂载时取一次值，之后 prop 换对象画面仍停在首帧，
+// 导致划线预览冻结、撤销后画面不更新。必须经 computed 跟随最新的 prop。
+const o = computed(() => props.o);
+const stroke = computed(() => o.value.strokeColor || (o.value.type === 'pdf' ? '#65758a' : '#27384a'));
+const sw = computed(() => o.value.stroke || 12);
+const dir = computed(() => (o.value.type === 'door' ? (o.value.dir || 1) : 1));
+const len = computed(() => (o.value.type === 'dimension' ? (o.value.length || o.value.w || 0) : 0));
+const centroid = computed(() => (o.value.type === 'polyroom' ? polyCentroid(o.value.points) : [0, 0]));
+const furnBase = computed(() => (o.value.type === 'furniture' ? furnBaseShapes(o.value.label, o.value.w, o.value.h, stroke.value, sw.value) : []));
+const furnDetail = computed(() => (o.value.type === 'furniture' ? furnDetailShapes(o.value.label, o.value.w, o.value.h, stroke.value, sw.value) : []));
 function pts(points: [number, number][] | undefined): string {
   return (points || []).map(p => p.join(',')).join(' ');
 }

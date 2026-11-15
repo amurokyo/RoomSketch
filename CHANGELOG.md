@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 2.0.1 — 2026-11-15
+
+划线预览冻结修复补丁。`schemaVersion` 仍为 1，2.0.0 与 1.0.0 工程均可打开，保存时自动升级为 2.0.1 格式。
+
+### 修复
+
+- **划线预览不可见**：`ObjectShape.vue` 用 `const o = props.o` 只在挂载时取一次值；绘制预览每帧换新对象、撤销 / 重做与打开工程换对象时，组件仍渲染首帧对象，预览冻结不动。墙体首帧只有一个点（0×0，完全不可见），矩形 / 多边形房间 / 尺寸标注 / 辅助线冻在很小的第一帧。改为 `const o = computed(() => props.o)`（模板自动解包，计算属性读 `o.value`）。同一根因还导致撤销 / 重做后画面不更新，一并修复。
+- 修复验证：`npm test` 全过；headless Chromium `file://` 实浏 6 项全过（墙 / 矩形 / 多边形房间 / 辅助线 / 尺寸标注预览均随鼠标更新；撤销后墙体从画面消失；深色模式下蓝色预览线可见）。
+
+### 交付
+
+- `RoomSketch-2.0.1.html`（与 `dist/index.html` 内容相同，2535875 字节）
+- `RoomSketch-2.0.1-Offline.zip`（单文件应用 + README + CHANGELOG + LICENSE + THIRD-PARTY-LICENSES.md + SHA256SUMS.txt）
+- `SHA256SUMS.txt`
+- `ACCEPTANCE-2.0.1.md`（发布验收报告）
+
 ## 2.0.0 — 2026-11-15
 
 Vue 3 + PDF.js + Three.js 重构版。单文件、纯离线、`file://` 双击可运行；工程文件格式 `schemaVersion: 1` 不变，1.0.0 工程与旧版 `{app: "RoomSketch", version: 2}` 工程均可打开，保存时自动升级为 2.0.0 格式。

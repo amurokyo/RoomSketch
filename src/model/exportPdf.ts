@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 矢量 PDF 导出（手写 PDF 写入器，移植 1.0.0，离线无依赖）
+// RoomSketch 2.0.1 — 矢量 PDF 导出（手写 PDF 写入器，移植 1.0.0，离线无依赖）
 // 结构：collectPdfContent（纯函数：对象 → PDF 操作流 + 文字遮罩规格 + 图片，
 // Node 可测）→ assemblePdf（组装 PDF 字节，文字遮罩可注入桩函数）→
 // buildPdfBytes（浏览器入口，默认用 canvas 生成文字遮罩）。

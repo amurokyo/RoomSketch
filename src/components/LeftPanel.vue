@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.0 — 左侧面板：工具 / 参数 / 家具图库 / PDF 净化 / 画布管理 -->
+<!-- RoomSketch 2.0.1 — 左侧面板：工具 / 参数 / 家具图库 / PDF 净化 / 画布管理 -->
 <template>
   <aside class="panel left" id="leftPanel">
     <div class="section">

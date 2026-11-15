@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — PDF 导入（PDF.js，文档 §6.4/§6.5）
+// RoomSketch 2.0.1 — PDF 导入（PDF.js，文档 §6.4/§6.5）
 // 替代 1.0.0 的自定义单页解析器：
 // - 多页：页面预览与选择，逐页提取；
 // - Form XObject：PDF.js 会把 Form 内容以内联算子的形式放进 operator list

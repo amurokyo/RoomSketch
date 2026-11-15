@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — PDF 标注清理检测（移植 1.0.0 detectPdfMarkup）
+// RoomSketch 2.0.1 — PDF 标注清理检测（移植 1.0.0 detectPdfMarkup）
 // 按颜色、主体连通区域和小型文字簇识别标注；只做检测与统计，删除由调用方
 // 在确认框 + 快照后执行（可 Ctrl+Z 撤销）。
 import type { RsObject } from './types.ts';

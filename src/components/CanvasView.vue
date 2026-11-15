@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.0 — 二维画布（SVG + 指针交互，移植 1.0.0 并修旋转手柄） -->
+<!-- RoomSketch 2.0.1 — 二维画布（SVG + 指针交互，移植 1.0.0 并修旋转手柄） -->
 <template>
   <div class="stage-head">
     <span>{{ toolName }}</span><span>·</span><span>{{ coordText }}</span>

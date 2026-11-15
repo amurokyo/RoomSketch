@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.0 — 统一导出对话框（阶段五） -->
+<!-- RoomSketch 2.0.1 — 统一导出对话框（阶段五） -->
 <!-- PNG / SVG / PDF 三种格式同一入口；导出失败只在对话框内提示，不中断应用。 -->
 <template>
   <div class="modal-mask" @click.self="close">

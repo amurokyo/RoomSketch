@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.0 — 右侧属性面板（移植 1.0.0 updateInspector） -->
+<!-- RoomSketch 2.0.1 — 右侧属性面板（移植 1.0.0 updateInspector） -->
 <template>
   <aside class="panel right" id="rightPanel">
     <div class="panel-title">对象属性</div>

@@ -73,14 +73,14 @@ console.log('--- 版本 ---');
 for (const [name, ver] of Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })) {
   console.log(`  ${name}: ${ver}`);
 }
-check('package.json 版本为 2.0.0', pkg.version === '2.0.0', pkg.version);
-check('构建产物含 RoomSketch 2.0.0', html.includes('RoomSketch 2.0.0'));
+check('package.json 版本为 2.0.1', pkg.version === '2.0.1', pkg.version);
+check('构建产物含 RoomSketch 2.0.1', html.includes('RoomSketch 2.0.1'));
 check('构建产物无 1.0.0 残留', !html.includes('1.0.0'));
-// 品牌后只允许 2.0.0，不允许裸 2.0；库内 Apache License 2.0 文本与
+// 品牌后只允许 2.0.1，不允许裸 2.0；库内 Apache License 2.0 文本与
 // pdf.js 字体数值（如 2.01462）不是我们的版本号，不在此查。
-check('构建产物品牌版本号为 2.0.0（非裸 2.0）', !/RoomSketch 2\.0(?!\.0)/.test(html));
-check('VERSION 文件为 2.0.0', readFileSync(path.join(root, 'VERSION'), 'utf-8').trim() === '2.0.0');
-check('源码单一版本常量为 2.0.0', /APP_VERSION = '2\.0\.0'/.test(readFileSync(path.join(root, 'src/version.ts'), 'utf-8')));
+check('构建产物品牌版本号为 2.0.1（非裸 2.0）', !/RoomSketch 2\.0(?!\.1)/.test(html));
+check('VERSION 文件为 2.0.1', readFileSync(path.join(root, 'VERSION'), 'utf-8').trim() === '2.0.1');
+check('源码单一版本常量为 2.0.1', /APP_VERSION = '2\.0\.1'/.test(readFileSync(path.join(root, 'src/version.ts'), 'utf-8')));
 
 if (failures) { console.error(`${failures} 项检查失败`); process.exit(1); }
 console.log('全部通过');

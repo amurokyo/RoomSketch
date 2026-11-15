@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 轻量确认框服务（替代 1.0.0 的 innerHTML 弹窗）
+// RoomSketch 2.0.1 — 轻量确认框服务（替代 1.0.0 的 innerHTML 弹窗）
 import { reactive } from 'vue';
 
 export interface ModalState {

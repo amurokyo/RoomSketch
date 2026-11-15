@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 颜色工具
+// RoomSketch 2.0.1 — 颜色工具
 /** '#27384a'（或 3 位简写）→ [0..1, 0..1, 0..1]，保留 3 位小数（PDF 颜色算子用）。 */
 export function hexRgb01(hex: string): [number, number, number] {
   let n = hex.replace('#', '');

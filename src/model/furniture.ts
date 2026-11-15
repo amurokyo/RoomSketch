@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 家具图库与外观分类（移植 1.0.0）
+// RoomSketch 2.0.1 — 家具图库与外观分类（移植 1.0.0）
 export interface FurnItem { label: string; w: number; h: number }
 export interface FurnCategory { cat: string; items: FurnItem[] }
 

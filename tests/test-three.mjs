@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 三维场景测试（Node 直接导入 TS 源码，Node 24 类型剥离）
+// RoomSketch 2.0.1 — 三维场景测试（Node 直接导入 TS 源码，Node 24 类型剥离）
 // 用法：node tests/test-three.mjs
 // 覆盖：collect3D 墙段开口切分（门洞留空+过梁、窗洞窗台+玻璃+过梁、
 // 未关联窗独立玻璃块、未关联门计入 unsupported）、开口校验、

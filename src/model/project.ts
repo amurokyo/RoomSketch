@@ -1,5 +1,5 @@
-// RoomSketch 2.0.0 — 工程文件校验与版本迁移入口（文档 §7）
-// 格式：{format:'roomsketch', schemaVersion:1, appVersion:'2.0.0', metadata, ...}
+// RoomSketch 2.0.1 — 工程文件校验与版本迁移入口（文档 §7）
+// 格式：{format:'roomsketch', schemaVersion:1, appVersion:'2.0.1', metadata, ...}
 // 兼容：旧版 {app:'RoomSketch', version:2} 打开时升级为当前格式；
 // 不支持的 schemaVersion 明确报错，绝不静默覆盖或静默忽略。
 import { APP_VERSION, FORMAT, SCHEMA_VERSION } from '../version.ts';

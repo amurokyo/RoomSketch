@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 导出测试（Node 直接导入 TS 源码，Node 24 类型剥离）
+// RoomSketch 2.0.1 — 导出测试（Node 直接导入 TS 源码，Node 24 类型剥离）
 // 用法：node tests/test-export.mjs
 // 覆盖：exportRectFor（全部/视图）、collectPdfContent（描边颜色 RG 算子——
 // 1.0.0 漏 RG 的回归测试、旋转对象坐标变换、门弧线 24 段、尺寸箭头填充、

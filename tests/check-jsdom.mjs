@@ -1,7 +1,7 @@
 // jsdom 下加载构建产物 dist/index.html（file:// 语义），断言：
 // - Vue 挂载成功，无 JS 致命错误；
 // - 自检面板：PDF 走主线程降级（jsdom 无 Worker）、WebGL 不可用但不阻断、
-//   存储检测出结果、构建信息含 2.0.0；
+//   存储检测出结果、构建信息含 2.0.1；
 // - 画布与工具栏渲染（SVG 画布、12 个工具按钮）；
 // - 文件选择（input type=file）可读取 2.0.0 工程 JSON 并替换对象列表；
 // - 保存按钮点击不抛错；主题切换可用；
@@ -119,17 +119,17 @@ for (let i = 0; i < 50; i++) {
 check('页面加载无 JS 致命错误', errors.length === 0, errors.slice(0, 3).join(' | '));
 check('加载 + PDF 处理全程零网络请求', netCalls.length === 0, netCalls.map(c => c.join(' ')).join(' | '));
 check('Vue 已挂载', /已挂载/.test(text('#check-vue')), text('#check-vue'));
-check('自检面板显示版本 2.0.0', /2\.0\.0/.test(text('#check-vue')), text('#check-vue'));
+check('自检面板显示版本 2.0.1', /2\.0\.1/.test(text('#check-vue')), text('#check-vue'));
 check('PDF 自检完成（测试 PDF 可解析）', pdfReady, text('#check-pdf'));
 check('PDF 走主线程降级（jsdom 无 Worker）', /主线程/.test(text('#check-pdf')), text('#check-pdf'));
 check('PDF 读到 2 页', /2 页/.test(text('#check-pdf')), text('#check-pdf'));
 check('WebGL 不可用但不阻断（jsdom 无 WebGL）', /WebGL 不可用/.test(text('#check-three')), text('#check-three'));
 check('三维渲染已接入（r182）', /三维渲染已接入/.test(text('#check-three')) && /r182/.test(text('#check-three')), text('#check-three'));
 check('存储能力检测已出结果', text('#check-storage').length > 0 && !/未检测/.test(text('#check-storage')), text('#check-storage'));
-check('构建信息含构建时间与 2.0.0', /构建时间/.test(text('#check-build')) && /2\.0\.0/.test(text('#check-build')), text('#check-build'));
+check('构建信息含构建时间与 2.0.1', /构建时间/.test(text('#check-build')) && /2\.0\.1/.test(text('#check-build')), text('#check-build'));
 check('SVG 画布已渲染', !!document.getElementById('canvas'));
 check('工具栏 12 个工具按钮', document.querySelectorAll('.tool-grid .tool').length === 12, `tools=${document.querySelectorAll('.tool-grid .tool').length}`);
-check('顶栏含 2.0.0 品牌', /RoomSketch/.test(document.querySelector('.brand')?.textContent || '') && /2\.0\.0/.test(document.querySelector('.brand')?.textContent || ''));
+check('顶栏含 2.0.1 品牌', /RoomSketch/.test(document.querySelector('.brand')?.textContent || '') && /2\.0\.1/.test(document.querySelector('.brand')?.textContent || ''));
 check('状态栏显示 0 个对象', /0 个对象/.test(document.querySelector('.statusbar')?.textContent || ''));
 
 // 文件选择：导入 2.0.0 工程 JSON，替换对象列表

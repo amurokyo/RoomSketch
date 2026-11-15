@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 响应式工程 store（单例）
+// RoomSketch 2.0.1 — 响应式工程 store（单例）
 // 集中管理工程文档、选中、工具、历史、保存/备份状态；
 // 视图状态（view 除外）不进历史，与 1.0.0 的 snapshot 语义一致。
 import { reactive, computed } from 'vue';
@@ -342,7 +342,7 @@ export function newProject(): void {
 export function saveProjectFile(): void {
   const data = serializeProject(state.doc);
   state.lastSavedAt = new Date().toISOString();
-  downloadBlob(new Blob([data], { type: 'application/json;charset=utf-8' }), 'RoomSketch-2.0.0-工程.json');
+  downloadBlob(new Blob([data], { type: 'application/json;charset=utf-8' }), 'RoomSketch-2.0.1-工程.json');
   state.dirty = false;
   setStatus('已导出工程文件 · 请确认浏览器下载完成');
   toast('工程文件已导出，请确认浏览器下载完成');
@@ -371,7 +371,7 @@ export function openProjectText(text: string): { ok: boolean; error?: string; up
   state.dirty = false;
   state.lastSavedAt = d.metadata.updatedAt;
   setStatus('工程文件已打开');
-  toast(`已载入 ${state.doc.objects.length} 个对象${r.upgradedFromOld ? '（旧版工程，已升级为 2.0.0 格式）' : ''}`);
+  toast(`已载入 ${state.doc.objects.length} 个对象${r.upgradedFromOld ? '（旧版工程，已升级为 2.0.1 格式）' : ''}`);
   return { ok: true, upgraded: r.upgradedFromOld };
 }
 

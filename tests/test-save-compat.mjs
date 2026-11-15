@@ -1,7 +1,7 @@
-// RoomSketch 2.0.0 — 阶段六 保存与兼容端到端（jsdom + 真实构建产物）
+// RoomSketch 2.0.1 — 阶段六 保存与兼容端到端（jsdom + 真实构建产物）
 // 用 http:// 语义加载（使 localStorage 可用，file:// 下 jsdom 的 localStorage
 // 会报 SecurityError）；覆盖：
-// - 保存→打开往返（保存 blob 含 2.0.0 元数据；经 #file-project 打开恢复对象与关联）
+// - 保存→打开往返（保存 blob 含 2.0.1 元数据；经 #file-project 打开恢复对象与关联）
 // - 旧版 {app:'RoomSketch', version:2} 与 1.0.0 新格式文件打开兼容（升级标记）
 // - 损坏/不支持的工程文件被拒且当前工程不动
 // - 自动备份端到端：写备份→新实例恢复条→确认恢复 / 忽略
@@ -130,7 +130,7 @@ function buildScene(rs) {
   const blob = a.savedJsonBlob();
   check('S1 保存产出 JSON blob', !!blob, blob ? `type=${blob.type}` : '无 json blob');
   const saved = JSON.parse(await blob.text());
-  check('S1 保存文件元数据为 2.0.0', saved.format === 'roomsketch' && saved.schemaVersion === 1 && saved.appVersion === '2.0.0',
+  check('S1 保存文件元数据为 2.0.1', saved.format === 'roomsketch' && saved.schemaVersion === 1 && saved.appVersion === '2.0.1',
     `format=${saved.format} schema=${saved.schemaVersion} app=${saved.appVersion}`);
   check('S1 保存文件含 4 个对象且门有关联', saved.objects.length === 4 &&
     saved.objects.find(o => o.type === 'door')?.wallId === w1, `door.wallId=${saved.objects.find(o => o.type === 'door')?.wallId}`);
@@ -168,7 +168,7 @@ function buildScene(rs) {
   a.click('#save-btn');
   await sleep(300);
   const saved = JSON.parse(await a.savedJsonBlob().text());
-  check('S2 旧版保存后升级为 2.0.0 格式', saved.format === 'roomsketch' && saved.appVersion === '2.0.0' && saved.objects.length === 1,
+  check('S2 旧版保存后升级为 2.0.1 格式', saved.format === 'roomsketch' && saved.appVersion === '2.0.1' && saved.objects.length === 1,
     `format=${saved.format} app=${saved.appVersion}`);
   const v1Doc = {
     format: 'roomsketch', schemaVersion: 1, appVersion: '1.0.0',
@@ -206,7 +206,7 @@ function buildScene(rs) {
   const backupJson = a.window.localStorage.getItem(BACKUP_KEY);
   check('S4 编辑后自动备份已写 localStorage', !!backupJson, backupJson ? `${backupJson.length} 字节` : '无');
   const backup = JSON.parse(backupJson);
-  check('S4 备份含 4 个对象 + 2.0.0 元数据', backup.objects.length === 4 && backup.appVersion === '2.0.0' && backup.schemaVersion === 1,
+  check('S4 备份含 4 个对象 + 2.0.1 元数据', backup.objects.length === 4 && backup.appVersion === '2.0.1' && backup.schemaVersion === 1,
     `objects=${backup.objects.length} app=${backup.appVersion}`);
   // 新实例：恢复条出现 → 确认恢复
   const b = await bootApp({ seedBackup: backupJson });

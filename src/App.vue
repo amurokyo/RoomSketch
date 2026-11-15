@@ -1,9 +1,9 @@
-<!-- RoomSketch 2.0.0 — 顶层壳：顶栏 / 左栏 / 画布 / 属性栏 / 状态栏 / 自检面板 -->
+<!-- RoomSketch 2.0.1 — 顶层壳：顶栏 / 左栏 / 画布 / 属性栏 / 状态栏 / 自检面板 -->
 <!-- 阶段五完成：3D 预览（ThreeView）与 PNG/SVG/PDF 统一导出（ExportDialog）已接通。 -->
 <template>
   <div class="app" :class="{ dark }">
     <header class="topbar">
-      <div class="brand">RoomSketch <span class="ver">2.0.0</span> <span class="tag">离线户型图</span></div>
+      <div class="brand">RoomSketch <span class="ver">2.0.1</span> <span class="tag">离线户型图</span></div>
       <div class="actions">
         <button @click="onNew">新建</button>
         <button id="save-btn" class="primary" @click="saveProjectFile">保存</button>

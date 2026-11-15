@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — 家具风格化平面图形描述子（移植 1.0.0 furnBase/furnDetail）
+// RoomSketch 2.0.1 — 家具风格化平面图形描述子（移植 1.0.0 furnBase/furnDetail）
 // 返回 SVG 元素描述子，由 ObjectShape.vue 以 <component :is> 渲染。
 // 圆形/椭圆家具体系与 1.0.0 完全一致。
 import { furnKind, ROUND_KINDS, type FurnKind } from './furniture.ts';

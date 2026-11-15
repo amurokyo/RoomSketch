@@ -1,4 +1,4 @@
-// RoomSketch 2.0.0 — SVG / PNG 导出（阶段五）
+// RoomSketch 2.0.1 — SVG / PNG 导出（阶段五）
 // SVG：克隆页面上已渲染的 #canvas（与屏幕所见同一份矢量），去掉交互层
 // （#selection-ui 选中框/手柄、#draft 绘制草稿），按导出范围设 viewBox。
 // 形状全部用 presentation 属性绘制（ObjectShape），不依赖页面 CSS，
