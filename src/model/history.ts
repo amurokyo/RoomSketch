@@ -2,6 +2,11 @@
 // 快照内容 = 工程状态（对象 + PDF 导入状态 + 计数器），与 1.0.0 一致；
 // 视图状态（view、选中）不进历史，选中由调用方在恢复后重建。
 // 上限 80 步，批量操作由调用方合并为一次快照。
+// 注意：两个栈必须是响应式数组——store 用 computed(() => history.undoDepth)
+// 驱动撤销/重做按钮的 disabled 状态；普通数组的 push/pop 不会触发 computed
+// 重算，按钮会永远 disabled（快捷键直接调 undo()/redo()，不受影响）。
+// 清空栈时用 length = 0 而不要整体换新数组，否则会丢掉响应式包装。
+import { reactive } from 'vue';
 import type { ProjectDoc, RsObject } from './types.ts';
 
 export interface HistoryState {
@@ -15,8 +20,8 @@ const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 
 export class History {
   readonly maxSteps = 80;
-  private undoStack: HistoryState[] = [];
-  private redoStack: HistoryState[] = [];
+  private undoStack: HistoryState[] = reactive([]);
+  private redoStack: HistoryState[] = reactive([]);
 
   get undoDepth(): number { return this.undoStack.length; }
   get redoDepth(): number { return this.redoStack.length; }
@@ -27,7 +32,7 @@ export class History {
   snapshot(state: HistoryState): void {
     this.undoStack.push(clone(state));
     if (this.undoStack.length > this.maxSteps) this.undoStack.shift();
-    this.redoStack = [];
+    this.redoStack.length = 0;
   }
 
   /** 撤销：返回应恢复的状态；无历史返回 null。 */
@@ -50,7 +55,7 @@ export class History {
   }
 
   clear(): void {
-    this.undoStack = [];
-    this.redoStack = [];
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
   }
 }

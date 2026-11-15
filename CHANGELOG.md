@@ -8,10 +8,11 @@
 
 - **划线预览不可见**：`ObjectShape.vue` 用 `const o = props.o` 只在挂载时取一次值；绘制预览每帧换新对象、撤销 / 重做与打开工程换对象时，组件仍渲染首帧对象，预览冻结不动。墙体首帧只有一个点（0×0，完全不可见），矩形 / 多边形房间 / 尺寸标注 / 辅助线冻在很小的第一帧。改为 `const o = computed(() => props.o)`（模板自动解包，计算属性读 `o.value`）。同一根因还导致撤销 / 重做后画面不更新，一并修复。
 - 修复验证：`npm test` 全过；headless Chromium `file://` 实浏 6 项全过（墙 / 矩形 / 多边形房间 / 辅助线 / 尺寸标注预览均随鼠标更新；撤销后墙体从画面消失；深色模式下蓝色预览线可见）。
+- **撤销 / 重做按钮点不动**：`History` 的两个栈是普通数组，`store` 用 `computed(() => history.undoDepth)` 驱动按钮的 `disabled` 状态，普通数组的 push/pop 不会触发 computed 重算，按钮永远 disabled（Ctrl+Z / Ctrl+Y 直接调 `undo()` / `redo()`，不受影响）。改为响应式数组，清空时用 `length = 0` 而不换新数组；实浏 5 项全过（画墙后撤销可用、点撤销墙消失且重做可用、点重做墙回来）。
 
 ### 交付
 
-- `RoomSketch-2.0.1.html`（与 `dist/index.html` 内容相同，2535875 字节）
+- `RoomSketch-2.0.1.html`（与 `dist/index.html` 内容相同，2535901 字节）
 - `RoomSketch-2.0.1-Offline.zip`（单文件应用 + README + CHANGELOG + LICENSE + THIRD-PARTY-LICENSES.md + SHA256SUMS.txt）
 - `SHA256SUMS.txt`
 - `ACCEPTANCE-2.0.1.md`（发布验收报告）
