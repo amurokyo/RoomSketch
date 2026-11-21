@@ -1,4 +1,5 @@
 node_modules/
 dist/
+*-Offline.zip
 *.local
 .DS_Store

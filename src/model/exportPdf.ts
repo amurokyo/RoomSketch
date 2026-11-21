@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — 矢量 PDF 导出（手写 PDF 写入器，移植 1.0.0，离线无依赖）
+// RoomSketch 2.0.2 — 矢量 PDF 导出（手写 PDF 写入器，移植 1.0.0，离线无依赖）
 // 结构：collectPdfContent（纯函数：对象 → PDF 操作流 + 文字遮罩规格 + 图片，
 // Node 可测）→ assemblePdf（组装 PDF 字节，文字遮罩可注入桩函数）→
 // buildPdfBytes（浏览器入口，默认用 canvas 生成文字遮罩）。
@@ -15,7 +15,7 @@ export interface PdfExportOptions {
   paper: 'A4' | 'A3';
   orient: 'landscape' | 'portrait';
   scale: number;
-  scope: 'view' | 'all';
+  scope: 'view' | 'all' | 'tight';
   hideGrid: boolean;
 }
 
@@ -150,12 +150,18 @@ export function collectPdfContent(
     else if (o.type === 'pdf' || o.type === 'polyline' || o.type === 'line') {
       emitPolyObj(o, o.points, color, Math.max(0.2, (o.stroke ?? 0.25) / s * PT), !!o.closed, !!o.closed && !!o.fill && o.fill !== 'none', o.fill ?? null);
     } else if (o.type === 'polyroom') {
-      emitPolyObj(o, [...o.points, o.points[0]], color, 10 / s * PT, true, true, '#e9f0fc');
+      emitPolyObj(o, [...o.points, o.points[0]], color, 10 / s * PT, true, true, o.fill || '#e9f0fc');
       const c = polyCentroid(o.points);
+      const fontMM = Math.min(4.2, Math.max(2.2, Math.sqrt(polyArea(o.points)) / s * 0.16));
       masks.push({
-        text: o.label || `≈ ${(polyArea(o.points) / 1e6).toFixed(1)} m²`,
-        wx: (o.x || 0) + c[0], wy: (o.y || 0) + c[1], anchor: 'middle',
-        paperMM: Math.min(4.2, Math.max(2.2, Math.sqrt(polyArea(o.points)) / s * 0.16)), color: '#2e5fb0',
+        text: o.label?.trim() || '未命名房间',
+        wx: (o.x || 0) + c[0], wy: (o.y || 0) + c[1] - fontMM * s * 0.35, anchor: 'middle',
+        paperMM: fontMM, color: o.strokeColor || '#2e5fb0',
+      });
+      masks.push({
+        text: `${(polyArea(o.points) / 1e6).toFixed(2)} m²${o.zone ? ` · ${o.zone}` : ''}`,
+        wx: (o.x || 0) + c[0], wy: (o.y || 0) + c[1] + fontMM * s * 0.8, anchor: 'middle',
+        paperMM: fontMM * 0.72, color: o.strokeColor || '#2e5fb0',
       });
     } else if (o.type === 'rect') {
       emitPolyObj(o, [[0, 0], [o.w, 0], [o.w, o.h], [0, o.h]], color, Math.max(0.25, (o.stroke || 12) / s * PT), true, !!o.fill && o.fill !== 'none', o.fill ?? null);
@@ -250,7 +256,8 @@ export async function assemblePdf(
     const o = im;
     return `q /G1 gs ${((o.w) / s * PT).toFixed(2)} 0 0 ${((o.h) / s * PT).toFixed(2)} ${X(o.x || 0).toFixed(2)} ${Y((o.y || 0) + o.h).toFixed(2)} cm /Bg${i} Do Q`;
   }).join('\n');
-  const stream = contentOps + '\n' + bgOps + '\n' + maskPaintOps + '\n';
+  // 底图先绘制，避免覆盖墙体、家具和标注。
+  const stream = bgOps + '\n' + contentOps + '\n' + maskPaintOps + '\n';
 
   const chunks: Uint8Array[] = [];
   let offset = 0;

@@ -1,7 +1,7 @@
 {
   "name": "roomsketch",
-  "version": "2.0.1",
-  "description": "RoomSketch 2.0.1 — 离线单文件户型绘图工具（Vue 3 + PDF.js + Three.js）",
+  "version": "2.0.2",
+  "description": "RoomSketch 2.0.2 — 离线单文件户型绘图工具（Vue 3 + PDF.js + Three.js）",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -9,7 +9,7 @@
   "scripts": {
     "build": "vite build",
     "gen-pdf": "node scripts/generate-test-pdf.mjs && node scripts/generate-vector-pdf.mjs",
-    "test": "node tests/test-geometry.mjs && node tests/test-model.mjs && node tests/test-pdf-vector.mjs && node tests/test-three.mjs && node tests/test-export.mjs && node --experimental-vm-modules tests/test-save-compat.mjs && node tests/check-dist.mjs && node tests/check-pdf.mjs && node --experimental-vm-modules tests/check-jsdom.mjs"
+    "test": "node tests/test-geometry.mjs && node tests/test-model.mjs && node tests/test-pdf-vector.mjs && node tests/test-three.mjs && node tests/test-export.mjs && node tests/test-upgrades.mjs && node --experimental-vm-modules tests/test-save-compat.mjs && node tests/check-dist.mjs && node tests/check-pdf.mjs && node --experimental-vm-modules tests/check-jsdom.mjs"
   },
   "keywords": [],
   "author": "",

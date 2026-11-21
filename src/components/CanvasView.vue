@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.1 — 二维画布（SVG + 指针交互，移植 1.0.0 并修旋转手柄） -->
+<!-- RoomSketch 2.0.2 — 二维画布（SVG + 指针交互，移植 1.0.0 并修旋转手柄） -->
 <template>
   <div class="stage-head">
     <span>{{ toolName }}</span><span>·</span><span>{{ coordText }}</span>
@@ -24,7 +24,7 @@
       <rect v-show="state.gridVisible" id="gridBg" x="-50000" y="-50000" width="100000" height="100000" fill="url(#bigGrid)" />
       <g id="objects">
         <ObjectShape
-          v-for="o in state.doc.objects" :key="o.id" :o="o"
+          v-for="o in visibleObjects" :key="o.id" :o="o"
           :class="{ 'marquee-selected': marqueeSet.has(o.id) }"
         />
       </g>
@@ -70,12 +70,16 @@ import {
   deleteSelected, markDirty, setStatus, toast, setTool, undo, redo,
   copySelected, pasteClip, rotateSelected90, duplicateSelected, nudgeSelected,
   deleteMarqueeSelection, cancelMarqueeSelection,
+  type ToolId,
 } from '../store.ts';
-import type { RsObject, ToolId } from '../model/types.ts';
+import type { RsObject, FurnitureObject } from '../model/types.ts';
 import { objBounds, selectionBounds, rectsIntersect, rectContains, localToWorld, worldToLocal, fmt } from '../model/geometry.ts';
 import { cornerResize, cornerLocal, type CornerId } from '../model/cornerResize.ts';
 import { syncWallOpenings, relocateOpening, slideOpening, snapToWall, WALL_SNAP_DIST } from '../model/wallLink.ts';
 import { FURN_PRESETS } from '../model/furniture.ts';
+import { orderedVisibleObjects, isObjectLocked, layerForObject } from '../model/layers.ts';
+import { furniturePlacement, alignFurniture, furnitureOverlap } from '../model/furniturePlacement.ts';
+import { ROOM_COLORS } from '../model/rooms.ts';
 
 const emit = defineEmits<{
   (e: 'calibrate', payload: { d: number; p1: { x: number; y: number }; p2: { x: number; y: number } }): void;
@@ -98,7 +102,8 @@ type DragState =
 const drawing = ref<Drawing>(null);
 const draftObj = ref<RsObject | null>(null);
 const dragState = ref<DragState>(null);
-const panState = ref<{ cx: number; cy: number; vx: number; vy: number } | null>(null);
+const panState = ref<{ cx: number; cy: number; vx: number; vy: number; sx: number; sy: number } | null>(null);
+const spaceDown = ref(false);
 const selBox = ref<{ start: { x: number; y: number }; end: { x: number; y: number } } | null>(null);
 const marqueeDrag = ref<{ start: { x: number; y: number }; end: { x: number; y: number } } | null>(null);
 const calibratePts = ref<{ x: number; y: number }[]>([]);
@@ -106,12 +111,13 @@ const lastTap = ref({ t: 0, x: 0, y: 0 });
 const justFinished = ref(0);
 const lastNudge = ref(0);
 const activePtrs = new Map<number, { x: number; y: number }>();
-const pinch = ref<{ d0: number; view0: { x: number; y: number; w: number; h: number }; anchor: { x: number; y: number } } | null>(null);
+const pinch = ref<{ d0: number; view0: { x: number; y: number; w: number; h: number }; anchor: { x: number; y: number }; mid: { x: number; y: number }; cw: number; ch: number } | null>(null);
 
 const toolName = computed(() => TOOL_NAMES[state.tool]);
 const svgMode = computed(() =>
-  state.marqueeMode ? 'mode-marquee' : state.tool === 'pan' ? 'mode-pan' : state.tool === 'select' ? 'mode-select' : 'mode-draw');
+  state.marqueeMode ? 'mode-marquee' : state.tool === 'pan' || spaceDown.value ? 'mode-pan' : state.tool === 'select' ? 'mode-select' : 'mode-draw');
 const marqueeSet = computed(() => new Set(state.marqueeIds));
+const visibleObjects = computed(() => orderedVisibleObjects(state.doc));
 
 const selectedObj = computed(() => state.doc.objects.find(o => o.id === state.selectedId) ?? null);
 const selBounds = computed(() => (selectedObj.value ? objBounds(selectedObj.value) : null));
@@ -125,7 +131,7 @@ const handleHalf = computed(() => (canvasSize.value.w < 700 ? 7 : 4.5) * pxPerUn
 /** 角点手柄：旋转后的真实角点（局部角点经 translate+rotate 变换）。 */
 const cornerHandles = computed(() => {
   const s = selectedObj.value;
-  if (!s || !['rect', 'furniture', 'imagebg', 'door', 'window', 'dimension'].includes(s.type)) return [];
+  if (!s || isObjectLocked(state.doc, s) || !['rect', 'furniture', 'imagebg', 'door', 'window', 'dimension'].includes(s.type)) return [];
   const ids: CornerId[] = ['nw', 'ne', 'se', 'sw'];
   return ids.map(id => {
     const [lx, ly] = cornerLocal(s, id);
@@ -137,7 +143,7 @@ const cornerHandles = computed(() => {
 /** 顶点手柄：局部点经旋转变换到世界坐标。 */
 const vertexHandles = computed(() => {
   const s = selectedObj.value;
-  if (!s || !['wall', 'polyline', 'line', 'polyroom'].includes(s.type) || !('points' in s)) return [];
+  if (!s || isObjectLocked(state.doc, s) || !['wall', 'polyline', 'line', 'polyroom'].includes(s.type) || !('points' in s)) return [];
   return s.points.map((p, i) => {
     const [wx, wy] = localToWorld(s, p[0], p[1]);
     return { id: `v${i}`, index: i, x: wx, y: wy };
@@ -177,6 +183,14 @@ function worldPoint(e: PointerEvent | MouseEvent | WheelEvent): { x: number; y: 
   return { x: q.x, y: q.y };
 }
 
+function beginPan(e: PointerEvent): void {
+  const ctm = svgEl.value?.getScreenCTM();
+  const sx = ctm && Math.abs(ctm.a) > 1e-9 ? 1 / Math.abs(ctm.a) : state.doc.view.w / Math.max(1, canvasSize.value.w);
+  const sy = ctm && Math.abs(ctm.d) > 1e-9 ? 1 / Math.abs(ctm.d) : state.doc.view.h / Math.max(1, canvasSize.value.h);
+  panState.value = { cx: e.clientX, cy: e.clientY, vx: state.doc.view.x, vy: state.doc.view.y, sx, sy };
+  svgEl.value?.setPointerCapture(e.pointerId);
+}
+
 function snap(p: { x: number; y: number }): { x: number; y: number } {
   if (!state.snapEnabled) return p;
   const g = Math.max(1, state.gridSize || 100);
@@ -196,6 +210,10 @@ function furnLabel(): string {
   return FURN_PRESETS[state.furnitureType]?.[2] || '自定义家具';
 }
 
+function furnKindValue(): string {
+  return state.customFurnKind || (state.furnitureType !== 'custom' ? state.furnitureType : 'box');
+}
+
 function drawPreview(o: RsObject | null): void {
   draftObj.value = o ? { ...o, id: 'draft', strokeColor: '#2874dc', fill: 'none' } as RsObject : null;
 }
@@ -211,7 +229,9 @@ function finishDraw(add = true): void {
   } else if (d?.kind === 'room' && d.points.length >= 3 && add) {
     const pts = d.points;
     const minx = Math.min(...pts.map(p => p.x)), miny = Math.min(...pts.map(p => p.y));
-    addObject({ type: 'polyroom', x: minx, y: miny, points: pts.map(p => [p.x - minx, p.y - miny] as [number, number]), stroke: 12, strokeColor: '#2e6ed8', fill: '#2e6ed8' });
+    const roomCount = state.doc.objects.filter(o => o.type === 'polyroom').length;
+    const color = ROOM_COLORS[roomCount % ROOM_COLORS.length];
+    addObject({ type: 'polyroom', x: minx, y: miny, points: pts.map(p => [p.x - minx, p.y - miny] as [number, number]), stroke: 12, strokeColor: color, fill: color, fillOpacity: 0.12, label: `房间 ${roomCount + 1}`, zone: '未分区', includeInTotal: true });
   }
   drawing.value = null;
   drawPreview(null);
@@ -232,8 +252,9 @@ function finishMarqueeSelection(): void {
   }
   state.marqueeRect = r;
   const contain = true; // 仅删除完全位于框内的对象（更安全），与 1.0.0 默认一致
+  const selectable = new Set(visibleObjects.value.filter(o => !isObjectLocked(state.doc, o)).map(o => o.id));
   state.marqueeIds = state.doc.objects
-    .filter(o => o.pdfOrigin || o.type === 'pdf')
+    .filter(o => selectable.has(o.id) && (o.pdfOrigin || o.type === 'pdf'))
     .filter(o => { const bb = selectionBounds(o); return contain ? rectContains(r, bb) : rectsIntersect(r, bb); })
     .map(o => o.id);
   state.selectedId = null;
@@ -248,7 +269,7 @@ function finishSelBox(endP: { x: number; y: number }): void {
   const r = { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) };
   const minSize = pxPerUnit.value * 5;
   if (r.w < minSize && r.h < minSize) { selectObject(null); return; }
-  state.multiIds = state.doc.objects.filter(o => rectsIntersect(r, objBounds(o))).map(o => o.id);
+  state.multiIds = visibleObjects.value.filter(o => !isObjectLocked(state.doc, o) && rectsIntersect(r, objBounds(o))).map(o => o.id);
   state.selectedId = null;
   setStatus(state.multiIds.length ? `已框选 ${state.multiIds.length} 个对象（拖动可整体移动）` : '框选范围内没有对象');
 }
@@ -273,12 +294,11 @@ function onPointerMove(e: PointerEvent): void {
   if (state.marqueeMode && marqueeDrag.value) { marqueeDrag.value.end = p; return; }
   if (selBox.value) { selBox.value.end = p; return; }
   if (panState.value) {
-    const v = state.doc.view;
-    const cw = canvasSize.value.w || 800, ch = canvasSize.value.h || 500;
+    const pan = panState.value;
     state.doc.view = {
-      ...v,
-      x: panState.value.vx - (e.clientX - panState.value.cx) * v.w / cw,
-      y: panState.value.vy - (e.clientY - panState.value.cy) * v.h / ch,
+      ...state.doc.view,
+      x: pan.vx - (e.clientX - pan.cx) * pan.sx,
+      y: pan.vy - (e.clientY - pan.cy) * pan.sy,
     };
     return;
   }
@@ -314,7 +334,16 @@ function onPointerMove(e: PointerEvent): void {
       }
     } else {
       const o = state.doc.objects.find(x => x.id === d.id);
-      if (o) { o.x = d.baseX + dx; o.y = d.baseY + dy; if (o.type === 'wall') syncWallOpenings(state.doc.objects, o); }
+      if (o) {
+        let nx = d.baseX + dx, ny = d.baseY + dy;
+        if (state.snapEnabled) { const sp = snap({ x: nx, y: ny }); nx = sp.x; ny = sp.y; }
+        if (o.type === 'furniture') {
+          const aligned = alignFurniture(o as FurnitureObject, nx, ny, visibleObjects.value, 6 * pxPerUnit.value);
+          nx = aligned.x; ny = aligned.y;
+        }
+        o.x = nx; o.y = ny;
+        if (o.type === 'wall') syncWallOpenings(state.doc.objects, o);
+      }
     }
     return;
   }
@@ -338,7 +367,7 @@ function onPointerMove(e: PointerEvent): void {
       else if (t === 'door') o = { type: 'door', id: 'draft', x: a.x, y: a.y, w: Math.max(100, Math.hypot(b.x - a.x, b.y - a.y)), dir: state.doorDir, stroke: 10 } as RsObject;
       else if (t === 'window') o = { type: 'window', id: 'draft', x: a.x, y: a.y, w: Math.max(100, Math.hypot(b.x - a.x, b.y - a.y)), rotation: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI, stroke: 10 } as RsObject;
       else if (t === 'dimension') o = { type: 'dimension', id: 'draft', x: a.x, y: a.y, length: Math.max(100, Math.hypot(b.x - a.x, b.y - a.y)), rotation: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI, label: `${Math.round(Math.hypot(b.x - a.x, b.y - a.y))} mm`, stroke: 8 } as RsObject;
-      else if (t === 'furniture') o = { type: 'furniture', id: 'draft', x, y, w, h, label: furnLabel(), stroke: 12 } as RsObject;
+      else if (t === 'furniture') o = { type: 'furniture', id: 'draft', x, y, w, h, label: furnLabel(), kind: furnKindValue(), stroke: 12 } as RsObject;
       drawPreview(o);
     }
   }
@@ -346,7 +375,12 @@ function onPointerMove(e: PointerEvent): void {
 
 function onPointerDown(e: PointerEvent): void {
   activePtrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (activePtrs.size === 2) { cancelDragForPinch(); pinch.value = startPinch(); toast('双指缩放画布'); return; }
+  if (activePtrs.size === 2) { cancelDragForPinch(); pinch.value = startPinch(); toast('双指缩放并平移画布'); return; }
+  if (e.button === 1 || (e.button === 0 && (spaceDown.value || e.altKey || state.tool === 'pan'))) {
+    e.preventDefault();
+    beginPan(e);
+    return;
+  }
   if (e.button !== 0) return;
   const raw = worldPoint(e);
   if (state.marqueeMode) {
@@ -358,12 +392,16 @@ function onPointerDown(e: PointerEvent): void {
     return;
   }
   const p = snap(raw);
-  if (state.tool === 'pan') {
-    panState.value = { cx: e.clientX, cy: e.clientY, vx: state.doc.view.x, vy: state.doc.view.y };
-    (svgEl.value as SVGSVGElement | null)?.setPointerCapture(e.pointerId);
+  if (state.tool === 'calibrate') { addCalibratedPoint(p); return; }
+  const toolLayers: Partial<Record<ToolId, ReturnType<typeof layerForObject>>> = {
+    wall: 'walls', room: 'rooms', furniture: 'furniture', door: 'openings', window: 'openings',
+    rect: 'annotations', line: 'annotations', dimension: 'annotations', label: 'annotations',
+  };
+  const targetLayer = toolLayers[state.tool];
+  if (targetLayer && state.doc.layers?.[targetLayer]?.locked) {
+    toast('目标图层已锁定，请先在右侧图层控制中解锁');
     return;
   }
-  if (state.tool === 'calibrate') { addCalibratedPoint(p); return; }
   if (state.tool === 'wall' || state.tool === 'room') {
     const kind = state.tool;
     const now = performance.now();
@@ -413,6 +451,10 @@ function onPointerDown(e: PointerEvent): void {
       const grp = (state.multiIds.includes(id) && state.multiIds.length > 1) ? state.multiIds.slice() : null;
       if (!grp) selectObject(id);
       const o = state.doc.objects.find(x => x.id === id);
+      if (o && isObjectLocked(state.doc, o)) {
+        toast('该对象位于锁定图层，仅可查看属性');
+        return;
+      }
       if (o) {
         snapshot();
         dragState.value = {
@@ -478,14 +520,13 @@ function onPointerUp(e: PointerEvent): void {
       addObject({ type: 'dimension', x: a.x, y: a.y, length: len, rotation: Math.atan2(p.y - a.y, p.x - a.x) * 180 / Math.PI, label: `${Math.round(len)} mm`, stroke: 8, strokeColor: '#4f647d' });
     }
     if (typ === 'furniture') {
-      let fw = w, fh = h;
-      const choice = state.furnitureType;
-      if (choice === 'custom') { fw = state.furnW || 1400; fh = state.furnH || 700; }
-      else if (Math.abs(p.x - a.x) < 20 || Math.abs(p.y - a.y) < 20) {
-        const dims = FURN_PRESETS[choice];
-        fw = dims?.[0] || state.furnW || 1400; fh = dims?.[1] || state.furnH || 700;
-      }
-      addObject({ type: 'furniture', x, y, w: fw, h: fh, label: furnLabel(), stroke: 12, strokeColor: '#65758a', fill: '#e9eef5' });
+      const placement = furniturePlacement(a, p, state.furnW || 1400, state.furnH || 700, 8 * pxPerUnit.value);
+      const created = addObject({
+        type: 'furniture', x: placement.x, y: placement.y, w: placement.w, h: placement.h,
+        label: furnLabel(), kind: furnKindValue(), stroke: 12, strokeColor: '#65758a', fill: '#e9eef5',
+      }) as FurnitureObject;
+      if (furnitureOverlap(created, visibleObjects.value)) toast('家具有重叠，已保留当前位置，可拖动微调；移动时支持边线 / 中心线吸附');
+      else setStatus(placement.dragged ? '家具已按拖动尺寸布设' : '家具已按标准尺寸居中放置');
     }
     drawing.value = null;
     drawPreview(null);
@@ -498,6 +539,9 @@ function onPointerCancel(e: PointerEvent): void {
   if (pinch.value && activePtrs.size < 2) pinch.value = null;
   if (marqueeDrag.value) { marqueeDrag.value = null; state.marqueeRect = null; state.marqueeIds = []; }
   if (selBox.value) selBox.value = null;
+  if (dragState.value) { dropLastSnapshot(); dragState.value = null; }
+  if (drawing.value?.kind === 'shape') { drawing.value = null; drawPreview(null); }
+  panState.value = null;
 }
 
 function onDblClick(e: MouseEvent): void {
@@ -509,18 +553,20 @@ function onClick(e: MouseEvent): void {
 }
 
 function onWheel(e: WheelEvent): void {
-  const factor = e.deltaY < 0 ? 0.88 : 1.14;
+  const requested = e.deltaY < 0 ? 0.88 : 1.14;
   const p = worldPoint(e);
   const v = state.doc.view;
+  const factor = Math.max(200 / v.w, Math.min(5e6 / v.w, requested));
   state.doc.view = { x: p.x - (p.x - v.x) * factor, y: p.y - (p.y - v.y) * factor, w: v.w * factor, h: v.h * factor };
 }
 
 // ---- 双指缩放 ----
-function startPinch(): { d0: number; view0: { x: number; y: number; w: number; h: number }; anchor: { x: number; y: number } } {
+function startPinch(): { d0: number; view0: { x: number; y: number; w: number; h: number }; anchor: { x: number; y: number }; mid: { x: number; y: number }; cw: number; ch: number } {
   const pts = [...activePtrs.values()];
   const a = pts[0], b = pts[1];
-  const mid = { clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 };
-  return { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, view0: { ...state.doc.view }, anchor: worldPoint(mid as unknown as PointerEvent) };
+  const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  const anchor = worldPoint({ clientX: mid.x, clientY: mid.y } as PointerEvent);
+  return { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, view0: { ...state.doc.view }, anchor, mid, cw: canvasSize.value.w || 800, ch: canvasSize.value.h || 500 };
 }
 
 function applyPinch(): void {
@@ -533,9 +579,11 @@ function applyPinch(): void {
   const nw = Math.max(200, Math.min(5e6, pinch.value.view0.w * ratio));
   const nh = Math.max(150, Math.min(5e6, pinch.value.view0.h * ratio));
   const f = nw / pinch.value.view0.w;
+  const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  const unit = nw / Math.max(1, pinch.value.cw);
   state.doc.view = {
-    x: pinch.value.anchor.x - (pinch.value.anchor.x - pinch.value.view0.x) * f,
-    y: pinch.value.anchor.y - (pinch.value.anchor.y - pinch.value.view0.y) * f,
+    x: pinch.value.anchor.x - (pinch.value.anchor.x - pinch.value.view0.x) * f - (mid.x - pinch.value.mid.x) * unit,
+    y: pinch.value.anchor.y - (pinch.value.anchor.y - pinch.value.view0.y) * f - (mid.y - pinch.value.mid.y) * unit,
     w: nw, h: nh,
   };
 }
@@ -557,6 +605,7 @@ function onKeyDown(e: KeyboardEvent): void {
     setTool('select');
   }
   const typing = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+  if (e.code === 'Space' && !typing) { e.preventDefault(); spaceDown.value = true; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && !typing) {
     if (state.marqueeIds.length) deleteMarqueeSelection();
     else deleteSelected();
@@ -589,6 +638,14 @@ function onKeyDown(e: KeyboardEvent): void {
 }
 
 // 供 App 调用：退出框选 / 删除框选（左栏按钮用）
+function onKeyUp(e: KeyboardEvent): void { if (e.code === 'Space') spaceDown.value = false; }
+function onWindowBlur(): void {
+  spaceDown.value = false;
+  activePtrs.clear();
+  pinch.value = null;
+  panState.value = null;
+  if (dragState.value) { dropLastSnapshot(); dragState.value = null; }
+}
 function requestDeleteMarquee(): void { deleteMarqueeSelection(); }
 function requestCancelMarquee(): void { cancelMarqueeSelection(); }
 
@@ -609,9 +666,13 @@ onMounted(() => {
     canvasSize.value = { w: svgEl.value.clientWidth || 800, h: svgEl.value.clientHeight || 500 };
   }
   window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
+  window.addEventListener('blur', onWindowBlur);
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeyDown);
+  window.removeEventListener('keyup', onKeyUp);
+  window.removeEventListener('blur', onWindowBlur);
 });
 </script>

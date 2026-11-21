@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — 导出测试（Node 直接导入 TS 源码，Node 24 类型剥离）
+// RoomSketch 2.0.2 — 导出测试（Node 直接导入 TS 源码，Node 24 类型剥离）
 // 用法：node tests/test-export.mjs
 // 覆盖：exportRectFor（全部/视图）、collectPdfContent（描边颜色 RG 算子——
 // 1.0.0 漏 RG 的回归测试、旋转对象坐标变换、门弧线 24 段、尺寸箭头填充、
@@ -33,6 +33,10 @@ const stubMask = async () => ({ w: 8, h: 8, rowBytes: 1, data: new Uint8Array([0
   check('视图范围即当前视图', v.x === 0 && v.y === 0 && v.w === 12000 && v.h === 8000, JSON.stringify(v));
   const e = exportRectFor([], VIEW, 'all');
   check('空工程 all 退回视图', e.w === 12000, JSON.stringify(e));
+  const tight = exportRectFor([wall()], VIEW, 'tight', { padding: 0 });
+  check('紧致范围按墙厚包围且不加宽边距', approx(tight.x, -60) && approx(tight.w, 4120) && approx(tight.h, 120), JSON.stringify(tight));
+  const tightBg = exportRectFor([{ id: 'bg', type: 'imagebg', x: 1000, y: 2000, w: 5000, h: 3000, src: 'x' }], VIEW, 'tight', { padding: 0 });
+  check('紧致范围包含底图原点与尺寸', approx(tightBg.x, 1000) && approx(tightBg.y, 2000) && approx(tightBg.w, 5000) && approx(tightBg.h, 3000), JSON.stringify(tightBg));
 }
 
 // ---------- hexRgb01 ----------
@@ -86,8 +90,9 @@ check('hex 3 位简写 #fff → 全 1', JSON.stringify(hexRgb01('#fff')) === '[1
     { id: 'r1', type: 'polyroom', x: 0, y: 0, points: [[0, 0], [4000, 0], [4000, 3000], [0, 3000]] },
     { id: 'f1', type: 'furniture', x: 500, y: 500, w: 2000, h: 1500, label: '双人床' },
   ], OPTS, VIEW);
-  check('房间+家具产生 2 个文字遮罩', c.masks.length === 2, `masks=${c.masks.length}`);
-  check('房间遮罩含面积文本', /m²/.test(c.masks[0].text), c.masks[0].text);
+  check('房间+家具产生 3 个文字遮罩（名称 / 面积 / 家具）', c.masks.length === 3, `masks=${c.masks.length}`);
+  check('房间名称遮罩为未命名房间', c.masks[0].text === '未命名房间', c.masks[0].text);
+  check('房间面积遮罩含面积文本', /m²/.test(c.masks[1].text), c.masks[1].text);
 }
 
 // ---------- assemblePdf（桩遮罩 + 1x1 JPEG 底图） ----------

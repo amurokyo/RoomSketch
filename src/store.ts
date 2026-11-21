@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — 响应式工程 store（单例）
+// RoomSketch 2.0.2 — 响应式工程 store（单例）
 // 集中管理工程文档、选中、工具、历史、保存/备份状态；
 // 视图状态（view 除外）不进历史，与 1.0.0 的 snapshot 语义一致。
 import { reactive, computed } from 'vue';
@@ -12,8 +12,11 @@ import {
   syncWallOpenings, detachWallOpenings, tryAttach, relocateOpening,
   slideOpening, normalizeOpenings, WALL_SNAP_DIST,
 } from './model/wallLink.ts';
-import { polyArea, objBounds, boundsUnion } from './model/geometry.ts';
+import { objBounds, boundsUnion } from './model/geometry.ts';
 import { downloadBlob } from './model/download.ts';
+import { collectRoomStats } from './model/rooms.ts';
+import { DEFAULT_LAYER_ORDER, isObjectLocked, normalizeLayerOrder, orderedVisibleObjects } from './model/layers.ts';
+import type { LayerId } from './model/types.ts';
 
 export type ToolId =
   | 'select' | 'wall' | 'room' | 'rect' | 'line' | 'dimension'
@@ -52,6 +55,7 @@ export const state = reactive({
   furnH: 700,
   doorDir: 1 as 1 | -1,
   customFurnLabel: null as string | null,
+  customFurnKind: null as string | null,
   scale: 50,
   // 3D
   threeOpen: false,
@@ -70,12 +74,11 @@ export const selectedObject = computed(() =>
 export const objectCount = computed(() => state.doc.objects.length);
 
 export const areaTotal = computed(() => {
-  let total = 0;
-  for (const o of state.doc.objects) {
-    if (o.type === 'polyroom') total += polyArea(o.points);
-    else if (o.type === 'rect' && o.label) total += o.w * o.h;
-  }
-  return total > 0 ? `${(total / 1e6).toFixed(1)} m²` : '—';
+  const stats = collectRoomStats(state.doc.objects);
+  let total = stats.totalMm2;
+  // 兼容旧版“带名称矩形”的面积统计；新建房间统一使用多边形。
+  for (const o of state.doc.objects) if (o.type === 'rect' && o.label) total += o.w * o.h;
+  return total > 0 ? `${(total / 1e6).toFixed(2)} m²` : '—';
 });
 
 export const undoDepth = computed(() => history.undoDepth);
@@ -138,7 +141,8 @@ export function saveBackup(): void {
     format: 'roomsketch', schemaVersion: SCHEMA_VERSION, appVersion: APP_VERSION,
     at: Date.now(), objects: state.doc.objects, view: state.doc.view,
     scale: state.scale, pdfImported: state.doc.pdfImported,
-    pdfPageSize: state.doc.pdfPageSize, counter: state.doc.counter,
+    pdfPageSize: state.doc.pdfPageSize, pdfPageSizes: state.doc.pdfPageSizes,
+    layers: state.doc.layers, layerOrder: state.doc.layerOrder, counter: state.doc.counter,
   });
   if (ok) { state.bkFailed = false; state.bkFailNotified = false; }
   else {
@@ -177,18 +181,20 @@ export function selectObject(id: string | null): void {
 
 export function deleteSelected(): void {
   if (!state.selectedId && !state.multiIds.length) return;
+  const requested = new Set(state.multiIds);
+  if (state.selectedId) requested.add(state.selectedId);
+  const del = new Set(state.doc.objects.filter(o => requested.has(o.id) && !isObjectLocked(state.doc, o)).map(o => o.id));
+  const lockedCount = requested.size - del.size;
+  if (!del.size) { toast('所选对象位于锁定图层，请先解锁'); return; }
   snapshot();
-  const del = new Set(state.multiIds);
-  if (state.selectedId) del.add(state.selectedId);
   const delWalls = state.doc.objects.filter(o => del.has(o.id) && o.type === 'wall').map(o => o.id);
   state.doc.objects = state.doc.objects.filter(o => !del.has(o.id));
   let detached = 0;
   for (const wid of delWalls) detached += detachWallOpenings(state.doc.objects, wid);
-  const cnt = del.size;
   state.selectedId = null;
   state.multiIds = [];
   markDirty();
-  setStatus(`已删除 ${cnt} 个对象${detached ? `；${detached} 个门窗已脱离墙体（待关联）` : ''}`);
+  setStatus(`已删除 ${del.size} 个对象${lockedCount ? `；${lockedCount} 个锁定对象已保留` : ''}${detached ? `；${detached} 个门窗已脱离墙体（待关联）` : ''}`);
   if (detached) toast(`${detached} 个门窗已脱离墙体，可拖到墙边重新吸附`);
 }
 
@@ -209,6 +215,7 @@ export function duplicateSelected(): void {
 export function rotateSelected90(): void {
   const o = selectedObject.value;
   if (!o) return;
+  if (isObjectLocked(state.doc, o)) { toast('对象所在图层已锁定'); return; }
   snapshot();
   o.rotation = ((o.rotation || 0) + 90) % 360;
   if (o.type === 'wall') syncWallOpenings(state.doc.objects, o);
@@ -242,7 +249,7 @@ export function nudgeSelected(dx: number, dy: number): void {
   if (!ids.length) return;
   for (const id of ids) {
     const o = state.doc.objects.find(x => x.id === id);
-    if (o) { o.x = (o.x || 0) + dx; o.y = (o.y || 0) + dy; }
+    if (o && !isObjectLocked(state.doc, o)) { o.x = (o.x || 0) + dx; o.y = (o.y || 0) + dy; }
   }
   for (const id of ids) {
     const o = state.doc.objects.find(x => x.id === id);
@@ -288,8 +295,9 @@ export function applyCalibration(factor: number): void {
 }
 
 export function fitView(canvasW: number, canvasH: number): void {
-  if (!state.doc.objects.length) { state.doc.view = { ...DEFAULT_VIEW }; return; }
-  const bs = state.doc.objects.map(objBounds);
+  const visible = orderedVisibleObjects(state.doc);
+  if (!visible.length) { state.doc.view = { ...DEFAULT_VIEW }; return; }
+  const bs = visible.map(objBounds);
   const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y));
   const r = Math.max(...bs.map(b => b.x + b.w)), bt = Math.max(...bs.map(b => b.y + b.h));
   let w = Math.max(100, r - x), h = Math.max(80, bt - y);
@@ -315,6 +323,7 @@ export function clearCanvas(): void {
   state.marqueeIds = [];
   state.doc.pdfImported = false;
   state.doc.pdfPageSize = null;
+  state.doc.pdfPageSizes = {};
   state.doc.view = { ...DEFAULT_VIEW };
   state.dirty = true;
   markDirty();
@@ -328,6 +337,9 @@ export function newProject(): void {
   state.doc.objects = [];
   state.doc.pdfImported = false;
   state.doc.pdfPageSize = null;
+  state.doc.pdfPageSizes = {};
+  state.doc.layers = fresh.layers;
+  state.doc.layerOrder = fresh.layerOrder;
   state.doc.view = { ...DEFAULT_VIEW };
   state.doc.counter = 1;
   state.selectedId = null;
@@ -342,7 +354,7 @@ export function newProject(): void {
 export function saveProjectFile(): void {
   const data = serializeProject(state.doc);
   state.lastSavedAt = new Date().toISOString();
-  downloadBlob(new Blob([data], { type: 'application/json;charset=utf-8' }), 'RoomSketch-2.0.1-工程.json');
+  downloadBlob(new Blob([data], { type: 'application/json;charset=utf-8' }), 'RoomSketch-2.0.2-工程.json');
   state.dirty = false;
   setStatus('已导出工程文件 · 请确认浏览器下载完成');
   toast('工程文件已导出，请确认浏览器下载完成');
@@ -362,6 +374,9 @@ export function openProjectText(text: string): { ok: boolean; error?: string; up
   state.doc.scale = d.scale;
   state.doc.pdfImported = d.pdfImported;
   state.doc.pdfPageSize = d.pdfPageSize;
+  state.doc.pdfPageSizes = d.pdfPageSizes || {};
+  state.doc.layers = d.layers;
+  state.doc.layerOrder = normalizeLayerOrder(d.layerOrder);
   state.doc.metadata = d.metadata;
   state.scale = d.scale;
   state.selectedId = null;
@@ -371,7 +386,7 @@ export function openProjectText(text: string): { ok: boolean; error?: string; up
   state.dirty = false;
   state.lastSavedAt = d.metadata.updatedAt;
   setStatus('工程文件已打开');
-  toast(`已载入 ${state.doc.objects.length} 个对象${r.upgradedFromOld ? '（旧版工程，已升级为 2.0.1 格式）' : ''}`);
+  toast(`已载入 ${state.doc.objects.length} 个对象${r.upgradedFromOld ? '（旧版工程，已升级为 2.0.2 格式）' : ''}`);
   return { ok: true, upgraded: r.upgradedFromOld };
 }
 
@@ -390,6 +405,8 @@ export function restoreBackup(): void {
   const r = validateProject({
     format: 'roomsketch', schemaVersion: SCHEMA_VERSION, appVersion: APP_VERSION,
     objects: d.objects, view: d.view, scale: d.scale,
+    pdfImported: d.pdfImported, pdfPageSize: d.pdfPageSize, pdfPageSizes: d.pdfPageSizes,
+    layers: d.layers, layerOrder: d.layerOrder, counter: d.counter,
   });
   if (!r.ok || !r.doc) {
     clearBackup();
@@ -404,6 +421,9 @@ export function restoreBackup(): void {
   state.doc.counter = Math.max(state.doc.counter, doc.counter);
   state.doc.pdfImported = doc.pdfImported;
   state.doc.pdfPageSize = doc.pdfPageSize;
+  state.doc.pdfPageSizes = doc.pdfPageSizes || {};
+  state.doc.layers = doc.layers;
+  state.doc.layerOrder = normalizeLayerOrder(doc.layerOrder);
   state.doc.view = doc.view;
   state.scale = doc.scale;
   state.doc.scale = state.scale;
@@ -426,13 +446,8 @@ export function startMarqueeMode(): void {
 
 export function deleteMarqueeSelection(): void {
   if (!state.marqueeIds.length) return;
-  const remove = new Set(state.marqueeIds), count = remove.size;
-  snapshot();
-  state.doc.objects = state.doc.objects.filter(o => !remove.has(o.id));
-  state.marqueeIds = [];
+  const count = deleteObjectsByIds(state.marqueeIds);
   state.marqueeRect = null;
-  if (state.selectedId && remove.has(state.selectedId)) state.selectedId = null;
-  markDirty();
   setStatus(`已删除框选区域内 ${count} 个 PDF 对象`);
   toast(`已删除 ${count} 个对象，可按 Ctrl+Z 撤销`);
 }
@@ -441,6 +456,56 @@ export function cancelMarqueeSelection(): void {
   state.marqueeMode = false;
   state.marqueeIds = [];
   state.marqueeRect = null;
+}
+
+/** PDF 自动清理与框选共用的删除入口：隐藏 / 锁定图层绝不批量删除。 */
+export function deleteObjectsByIds(ids: string[]): number {
+  const requested = new Set(ids);
+  const remove = new Set(state.doc.objects.filter(o => requested.has(o.id) && !isObjectLocked(state.doc, o)).map(o => o.id));
+  if (!remove.size) return 0;
+  snapshot();
+  const delWalls = state.doc.objects.filter(o => remove.has(o.id) && o.type === 'wall').map(o => o.id);
+  state.doc.objects = state.doc.objects.filter(o => !remove.has(o.id));
+  for (const wid of delWalls) detachWallOpenings(state.doc.objects, wid);
+  if (state.selectedId && remove.has(state.selectedId)) state.selectedId = null;
+  state.multiIds = state.multiIds.filter(id => !remove.has(id));
+  state.marqueeIds = [];
+  markDirty();
+  return remove.size;
+}
+
+export function setLayerVisible(id: LayerId, visible: boolean): void {
+  if (!state.doc.layers) return;
+  state.doc.layers[id].visible = visible;
+  if (!visible && state.selectedId) {
+    const selected = state.doc.objects.find(o => o.id === state.selectedId);
+    if (selected && !orderedVisibleObjects(state.doc).includes(selected)) state.selectedId = null;
+  }
+  markDirty();
+  setStatus(`${id} 图层已${visible ? '显示' : '隐藏'}`);
+}
+
+export function toggleLayerLock(id: LayerId): void {
+  if (!state.doc.layers) return;
+  state.doc.layers[id].locked = !state.doc.layers[id].locked;
+  markDirty();
+  setStatus(`图层已${state.doc.layers[id].locked ? '锁定' : '解锁'}`);
+}
+
+export function moveLayer(id: LayerId, delta: -1 | 1): void {
+  const order = normalizeLayerOrder(state.doc.layerOrder);
+  const from = order.indexOf(id), to = from + delta;
+  if (from < 0 || to < 0 || to >= order.length) return;
+  [order[from], order[to]] = [order[to], order[from]];
+  state.doc.layerOrder = order;
+  markDirty();
+  setStatus('图层顺序已调整（列表自下而上为叠放顺序）');
+}
+
+export function resetLayers(): void {
+  state.doc.layerOrder = [...DEFAULT_LAYER_ORDER];
+  if (state.doc.layers) for (const id of DEFAULT_LAYER_ORDER) state.doc.layers[id] = { visible: true, locked: false };
+  markDirty();
 }
 
 export function finishBoot(): void {

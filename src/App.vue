@@ -1,9 +1,9 @@
-<!-- RoomSketch 2.0.1 — 顶层壳：顶栏 / 左栏 / 画布 / 属性栏 / 状态栏 / 自检面板 -->
+<!-- RoomSketch 2.0.2 — 顶层壳：顶栏 / 左栏 / 画布 / 属性栏 / 状态栏 / 自检面板 -->
 <!-- 阶段五完成：3D 预览（ThreeView）与 PNG/SVG/PDF 统一导出（ExportDialog）已接通。 -->
 <template>
   <div class="app" :class="{ dark }">
     <header class="topbar">
-      <div class="brand">RoomSketch <span class="ver">2.0.1</span> <span class="tag">离线户型图</span></div>
+      <div class="brand">RoomSketch <span class="ver">2.0.2</span> <span class="tag">离线户型图</span></div>
       <div class="actions">
         <button @click="onNew">新建</button>
         <button id="save-btn" class="primary" @click="saveProjectFile">保存</button>
@@ -68,12 +68,12 @@
       <p class="hint">本页面为完全离线单文件：Vue / PDF.js / Three.js 全部内联，运行时不发起任何网络请求，双击即可在 file:// 下打开。</p>
     </section>
 
-    <div v-if="modalState.open" class="modal-mask" @click.self="closeModal">
+    <div v-if="modalState.open" class="modal-mask" @click.self="cancelModal">
       <div class="modal" role="dialog" aria-modal="true">
         <h3>{{ modalState.title }}</h3>
         <p>{{ modalState.message }}</p>
         <div class="modal-btns">
-          <button @click="closeModal">取消</button>
+          <button @click="cancelModal">取消</button>
           <button class="primary" :class="{ danger: modalState.danger }" @click="confirmModal">{{ modalState.confirmText }}</button>
         </div>
       </div>
@@ -138,7 +138,7 @@ import {
   fitView, zoomView, addObject, snapshot, markDirty, setStatus, toast,
   saveBackup, checkRestoreCandidate, finishBoot, restoreBackup, dismissRestore, uid,
 } from './store.ts';
-import { modalState, closeModal, confirmModal, showConfirm } from './modal.ts';
+import { modalState, confirmModal, cancelModal, showConfirm } from './modal.ts';
 import { loadPdfDocument, type PdfDocument } from './model/pdfVector.ts';
 import { probeStorage } from './model/storage.ts';
 import { APP_VERSION } from './version.ts';
@@ -274,12 +274,17 @@ async function importPdfPages(doc: PdfDocument, nums: number[]): Promise<void> {
       const vecs = await doc.extractPageVectors(num);
       if (!vecs.length) { emptyPages.push(num); continue; }
       const ox = idx * 100, oy = idx * 100;
+      const pageInfo = doc.pages.find(p => p.num === num);
+      if (pageInfo) {
+        state.doc.pdfPageSizes = state.doc.pdfPageSizes || {};
+        state.doc.pdfPageSizes[String(num)] = { w: pageInfo.w, h: pageInfo.h };
+      }
       for (const v of vecs) {
         state.doc.objects.push({
           type: 'pdf', id: uid(), x: 0, y: 0,
           points: v.points.map(p => [p[0] + ox, p[1] + oy] as [number, number]),
           stroke: v.stroke, strokeColor: v.strokeColor,
-          pdfStrokeColor: v.pdfStrokeColor, closed: v.closed, pdfOrigin: true,
+          pdfStrokeColor: v.pdfStrokeColor, closed: v.closed, pdfOrigin: true, pdfPage: num,
         });
         added++;
       }
@@ -304,20 +309,27 @@ async function importPdfPages(doc: PdfDocument, nums: number[]): Promise<void> {
   }
   if (doc.warnings.length) toast(doc.warnings[0]);
   if (emptyPages.length) {
+    // 扫描页确认前不能销毁 PDF 文档；取消也必须释放，避免 Worker / 内存泄漏。
     showConfirm({
       title: '无矢量页转图片底图？',
       message: `第 ${emptyPages.join('、')} 页没有可提取的矢量线条（可能是扫描页），是否把这些页渲染成图片作为底图导入？`,
       confirmText: '渲染为底图',
       onConfirm: async () => {
-        for (const num of emptyPages) {
-          try {
-            const img = await doc.renderPageImage(num, 2);
-            addObject({ type: 'imagebg', x: 0, y: 0, w: img.w, h: img.h, src: img.dataUrl, srcW: img.pxW, srcH: img.pxH });
-          } catch (err) { toast(`第 ${num} 页渲染失败：` + String(err)); }
+        try {
+          for (const num of emptyPages) {
+            try {
+              const img = await doc.renderPageImage(num, 2);
+              addObject({ type: 'imagebg', x: 0, y: 0, w: img.w, h: img.h, src: img.dataUrl, srcW: img.pxW, srcH: img.pxH });
+            } catch (err) { toast(`第 ${num} 页渲染失败：` + String(err)); }
+          }
+          setStatus('扫描页已渲染为图片底图');
+        } finally {
+          await doc.destroy();
         }
-        setStatus('扫描页已渲染为图片底图');
       },
+      onCancel: async () => { await doc.destroy(); },
     });
+    return;
   }
   await doc.destroy();
 }
@@ -440,6 +452,34 @@ button.danger:hover:not(:disabled) { background: #a93226; }
 .stage { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: 10px; }
 .statusbar { display: flex; gap: 18px; padding: 6px 14px; background: #fff; border-top: 1px solid #dfe5ee; font-size: 13px; color: #54627a; flex-wrap: wrap; }
 .statusbar .bad { color: #c0392b; font-weight: 600; }
+.property-summary { background: #f7f9fc; border: 1px solid #e3e9f1; border-radius: 8px; padding: 10px; font-size: 13px; line-height: 1.5; }
+.inspector-empty { text-align: center; color: #7a8698; padding: 22px 0; font-size: 13px; }
+.inspector-empty .big { font-size: 30px; margin-bottom: 5px; }
+.prop-actions { display: flex; gap: 6px; margin-top: 10px; }
+.prop-actions button { flex: 1; }
+.pdf-info-box { font-size: 12px; color: #7a8698; line-height: 1.55; background: #f7f9fc; border: 1px solid #e3e9f1; border-radius: 6px; padding: 8px; }
+.tipbox { margin-top: 15px; padding: 10px; background: #f2f7ff; border: 1px solid #d8e5fa; border-radius: 8px; font-size: 12px; color: #4a5b72; line-height: 1.65; }
+.layer-list { display: flex; flex-direction: column; gap: 5px; }
+.layer-row { display: grid; grid-template-columns: 1fr auto auto auto auto; align-items: center; gap: 4px; background: #f7f9fc; border: 1px solid #e3e9f1; border-radius: 6px; padding: 5px 7px; font-size: 13px; }
+.layer-row.hidden { opacity: .55; }
+.layer-row.locked { border-color: #f0d48a; background: #fff8e1; }
+.layer-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.layer-name small { color: #7a8698; margin-left: 4px; font-size: 11px; }
+.layer-btn { border: none; background: none; padding: 2px 4px; font-size: 12px; cursor: pointer; }
+.layer-btn:disabled { opacity: .3; cursor: default; }
+.layer-btn input { margin: 0; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+.stat-cell { background: #f7f9fc; border: 1px solid #e3e9f1; border-radius: 6px; padding: 8px; text-align: center; }
+.stat-cell b { display: block; font-size: 14px; }
+.stat-cell span { color: #7a8698; font-size: 12px; }
+.zone-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.zone-row { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; background: #f7f9fc; border-radius: 5px; padding: 5px 7px; }
+.room-list { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; margin-bottom: 8px; }
+.room-row { display: grid; grid-template-columns: 14px 1fr auto; align-items: center; gap: 6px; text-align: left; font-size: 12px; padding: 5px 7px; }
+.room-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,.15); }
+.room-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.room-name small { display: block; color: #7a8698; font-size: 10px; }
+.room-row b.muted { color: #98a2b0; font-weight: 500; }
 #selfcheck { background: #fff; border-top: 1px solid #dfe5ee; padding: 12px 16px; }
 #selfcheck h2 { font-size: 16px; margin: 0 0 8px; }
 #selfcheck table { border-collapse: collapse; width: 100%; }
@@ -512,6 +552,11 @@ button.danger:hover:not(:disabled) { background: #a93226; }
 .app.dark #selfcheck td:first-child { background: #222a35; }
 .app.dark .restore-bar { background: #3a2f10; border-color: #6b5518; color: #f5e6b3; }
 .app.dark .hint { color: #9aa7b8; }
+.app.dark .property-summary, .app.dark .stat-cell, .app.dark .zone-row,
+.app.dark .pdf-info-box, .app.dark .layer-row { background: #222a35; border-color: #3a4656; }
+.app.dark .tipbox { background: #243040; border-color: #354a63; color: #d6e1f0; }
+.app.dark .layer-row.locked { background: #3a2f10; border-color: #6b5518; }
+.app.dark .room-swatch { border-color: rgba(255,255,255,.25); }
 .app.dark .kbd { background: #303a49; border-color: #3a4656; }
 .app.dark .inspector .row input, .app.dark .inspector .row select { background: #262e3a; border-color: #3a4656; color: #e6e9ee; }
 @media (max-width: 900px) {

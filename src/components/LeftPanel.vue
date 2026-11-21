@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.1 — 左侧面板：工具 / 参数 / 家具图库 / PDF 净化 / 画布管理 -->
+<!-- RoomSketch 2.0.2 — 左侧面板：工具 / 参数 / 家具图库 / PDF 净化 / 画布管理 -->
 <template>
   <aside class="panel left" id="leftPanel">
     <div class="section">
@@ -9,7 +9,7 @@
           @click="setTool(t.id)"
         ><span class="ico">{{ t.ico }}</span>{{ t.name }}</button>
       </div>
-      <div class="hint" style="margin-top:9px">墙体 / 房间：连续单击添加拐点（默认自动横竖对齐网格，按住 Shift 可画斜线），双击或“完成绘制”结束；其他图形：按住拖动绘制。选中对象后可拖动 <b>角点手柄</b> 缩放、拖动 <b>顶点手柄</b> 改形。按 <span class="kbd">Esc</span> 结束当前绘制。</div>
+      <div class="hint" style="margin-top:9px">墙体 / 房间：连续单击添加拐点（默认自动横竖对齐网格，按住 Shift 可画斜线），双击或“完成绘制”结束；其他图形：按住拖动绘制。选中对象后可拖动 <b>角点手柄</b> 缩放、拖动 <b>顶点手柄</b> 改形。按 <span class="kbd">Esc</span> 结束当前绘制。中键、<span class="kbd">空格</span>+左键或 Alt+左键可临时平移画布。</div>
     </div>
 
     <div class="section">
@@ -48,8 +48,8 @@
     </div>
 
     <div class="section">
-      <div class="panel-title">家具图库</div>
-      <input v-model="furnQuery" class="furn-search" placeholder="搜索家具，如：床 / 沙发 / 柜">
+      <div class="panel-title">家具图库（{{ furnTotal }} 件）</div>
+      <input v-model="furnQuery" class="furn-search" placeholder="搜索家具，如：床 / 沙发 / 柜 / 机柜">
       <div class="furn-cats">
         <button
           v-for="c in furnCats" :key="c" class="furn-cat" :class="{ active: furnCat === c }"
@@ -62,21 +62,37 @@
         </button>
         <div v-if="!furnItems.length" class="hint">没有匹配的家具</div>
       </div>
-      <div class="hint" style="margin-top:7px">点击图库项后切换到家具工具，在画布上按住拖动放置（轻轻一点则按标准尺寸放置）。</div>
+      <div class="hint" style="margin-top:7px">点击图库项后切换到家具工具：轻点按标准尺寸居中放置，拖动按实际尺寸放置；移动时支持边线 / 中心线吸附，重叠会提示。</div>
     </div>
 
     <div class="section">
       <div class="panel-title">PDF 图纸净化</div>
-      <button class="danger" :disabled="!cleanInfo.count" style="width:100%" @click="onCleanPdf">
-        {{ cleanInfo.count ? `一键清除标注 / 文字（${cleanInfo.count}）` : '一键清除标注 / 文字' }}
-      </button>
+      <div class="field-row">
+        <div class="field"><label>清理强度</label><select v-model="cleanupMode"><option value="conservative">保守 · 少删</option><option value="balanced">均衡 · 推荐</option><option value="aggressive">深度 · 多删</option></select></div>
+        <div class="field"><label>字形阈值 (mm)</label><input v-model.number="glyphSize" type="number" min="2" max="18" step="0.5"></div>
+      </div>
+      <label class="checkline"><input v-model="preserveConnected" type="checkbox"> 保留连接主结构的小墙段 / 楼梯线</label>
+      <label class="checkline"><input v-model="removeOutside" type="checkbox"> 清理主体外的图签 / 引出标记（默认关闭，避免误删房间结构）</label>
+      <div class="field-row">
+        <button :disabled="!cleanInfo.count" @click="previewClean">{{ cleanPreviewActive ? '取消高亮预览' : `预览待清理（${cleanInfo.count}）` }}</button>
+        <button class="danger" :disabled="!cleanInfo.count" @click="onCleanPdf">确认净化</button>
+      </div>
       <button class="primary" :disabled="!state.doc.pdfImported" style="width:100%; margin-top:7px" @click="startMarqueeMode">▧ 框选区域删除</button>
       <div class="field-row" style="margin-top:7px">
-        <button class="danger" :disabled="!state.marqueeIds.length" @click="deleteMarqueeSelection">删除框选对象（{{ state.marqueeIds.length }}）</button>
-        <button :disabled="!state.marqueeMode && !state.marqueeIds.length" @click="cancelMarqueeSelection">退出框选</button>
+        <button class="danger" :disabled="!state.marqueeIds.length" @click="deleteMarqueeSelection">删除高亮对象（{{ state.marqueeIds.length }}）</button>
+        <button :disabled="!state.marqueeMode && !state.marqueeIds.length" @click="cancelMarqueeSelection">退出 / 取消</button>
       </div>
       <div class="hint" style="margin-top:7px">{{ marqueeHint }}</div>
       <div class="hint" style="margin-top:8px">{{ cleanHint }}</div>
+      <div v-if="selectedImage" class="raster-clean" style="margin-top:10px; padding-top:10px; border-top:1px solid #edf0f4">
+        <div class="panel-title">扫描页 / 图片底图净化</div>
+        <div class="field-row">
+          <div class="field"><label>前景阈值</label><input v-model.number="rasterThreshold" type="number" min="60" max="230"></div>
+          <div class="field"><label>文字块上限 (px)</label><input v-model.number="rasterGlyph" type="number" min="8" max="300"></div>
+        </div>
+        <button style="width:100%" :disabled="rasterBusy" @click="onCleanRaster">{{ rasterBusy ? '正在分析连通区域…' : '净化选中图片底图' }}</button>
+        <div class="hint">按 8 邻域连通域去除文字和噪点，始终保留最大主体结构；深色图纸自动反色。净化前可撤销原操作。</div>
+      </div>
     </div>
 
     <div class="section">
@@ -98,12 +114,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
-  state, setTool, reattachAll, deleteSelected, snapshot, markDirty, setStatus, toast,
+  state, setTool, reattachAll, deleteSelected, setStatus, toast,
   startMarqueeMode, deleteMarqueeSelection, cancelMarqueeSelection, clearCanvas,
-  type ToolId,
+  deleteObjectsByIds, type ToolId,
 } from '../store.ts';
 import { FURN_LIB, FURN_PRESETS, type FurnItem } from '../model/furniture.ts';
-import { detectPdfMarkup } from '../model/pdfCleanup.ts';
+import { detectPdfMarkup, DEFAULT_PDF_CLEANUP, type MarkupResult } from '../model/pdfCleanup.ts';
+import { cleanRasterDataUrl } from '../model/rasterCleanup.ts';
+import { orderedVisibleObjects, isObjectLocked } from '../model/layers.ts';
 import { showConfirm } from '../modal.ts';
 
 defineEmits(['zoom-in', 'zoom-out', 'fit-view']);
@@ -125,6 +143,7 @@ const tools: { id: ToolId; name: string; ico: string }[] = [
 
 const furnQuery = ref('');
 const furnCat = ref('全部');
+const furnTotal = FURN_LIB.reduce((sum, c) => sum + c.items.length, 0);
 const furnCats = computed(() => ['全部', ...FURN_LIB.map(c => c.cat)]);
 const furnItems = computed(() => {
   const q = furnQuery.value.trim().toLowerCase();
@@ -138,36 +157,64 @@ const furnItems = computed(() => {
 
 function onFurnTypeChange(): void {
   state.customFurnLabel = null;
+  state.customFurnKind = null;
   const a = FURN_PRESETS[state.furnitureType];
   if (a) { state.furnW = a[0]; state.furnH = a[1]; }
 }
 
 function pickFurn(it: FurnItem & { cat: string }): void {
   state.customFurnLabel = it.label;
+  state.customFurnKind = it.kind;
   state.furnitureType = 'custom';
   state.furnW = it.w;
   state.furnH = it.h;
   setTool('furniture');
-  toast(`已选择「${it.label}」，在画布上拖动放置`);
+  toast(`已选择「${it.label}」，在画布上轻点或拖动放置`);
 }
 
 // ---- PDF 净化 ----
-const cleanInfo = computed(() =>
-  state.doc.pdfImported
-    ? detectPdfMarkup(state.doc.objects, state.doc.pdfPageSize)
-    : { ids: [] as string[], count: 0, details: { removedBlack: 0, removedFrame: 0, removedOutside: 0, removedGlyph: 0, coreFound: false, neutralIsMarkup: false } });
+const EMPTY_RESULT: MarkupResult = {
+  ids: [], count: 0,
+  details: { removedBlack: 0, removedFrame: 0, removedOutside: 0, removedGlyph: 0, rescuedSmall: 0, coreFound: false, neutralIsMarkup: false },
+};
+const cleanupMode = ref(DEFAULT_PDF_CLEANUP.mode);
+const glyphSize = ref(DEFAULT_PDF_CLEANUP.glyphSize);
+const preserveConnected = ref(DEFAULT_PDF_CLEANUP.preserveConnected);
+const removeOutside = ref(DEFAULT_PDF_CLEANUP.removeOutside);
+
+const cleanInfo = computed(() => {
+  if (!state.doc.pdfImported) return EMPTY_RESULT;
+  const targets = orderedVisibleObjects(state.doc)
+    .filter(o => (o.type === 'pdf') && !isObjectLocked(state.doc, o));
+  return detectPdfMarkup(targets, state.doc.pdfPageSize, {
+    mode: cleanupMode.value, glyphSize: glyphSize.value,
+    preserveConnected: preserveConnected.value, removeOutside: removeOutside.value,
+  }, state.doc.pdfPageSizes || {});
+});
+const cleanPreviewActive = computed(() => cleanInfo.value.count > 0 && state.marqueeIds.length === cleanInfo.value.count);
 
 const marqueeHint = computed(() =>
   state.marqueeIds.length
-    ? `已框选 ${state.marqueeIds.length} 个 PDF 对象。红色高亮区域为待删除对象；确认删除前可重新框选。`
-    : '导入 PDF 后点击“框选区域删除”，在图纸上按住拖出矩形。红色高亮的 PDF 线条将被选中，确认后删除。');
+    ? `已高亮 ${state.marqueeIds.length} 个对象。红色高亮为待删除范围；重新框选或预览都会更新该范围。`
+    : '导入 PDF 后可点击“预览待清理”，也可使用“框选区域删除”在图纸上手动圈选。红色高亮的对象确认后删除。');
 
 const cleanHint = computed(() => {
-  if (!state.doc.pdfImported) return '针对 CAD 矢量 PDF：按颜色、主体连通区域和小型文字簇识别标注；清理前显示统计数量，Ctrl+Z 可撤销。';
+  if (!state.doc.pdfImported) return '针对 CAD 矢量 PDF：逐页识别颜色、主体连通区域和小型文字簇；与主结构相连的小路径可抢救保留。清理前先高亮预览，Ctrl+Z 可撤销。';
   const d = cleanInfo.value.details;
-  if (cleanInfo.value.count) return `发现约 ${cleanInfo.value.count} 个待清理矢量对象：黑色文字/引线 ${d.removedBlack || 0}，页面边框 ${d.removedFrame || 0}，主体外标记 ${d.removedOutside || 0}，小型文字簇 ${d.removedGlyph || 0}。点击即可净化，Ctrl+Z 可撤销。`;
-  return '没有发现足够明确的多余标注。为避免误删墙体结构，建议使用“框选区域删除”手动清理。';
+  if (cleanInfo.value.count) {
+    return `检测到 ${cleanInfo.value.count} 个待清理对象：文字/引线 ${d.removedBlack || 0}，页面边框 ${d.removedFrame || 0}，主体外标记 ${d.removedOutside || 0}，小型文字簇 ${d.removedGlyph || 0}；已保护连接主结构的小路径 ${d.rescuedSmall || 0} 个。`;
+  }
+  return '当前强度下没有明确的多余标注。为避免误删墙体结构，建议调低阈值或使用框选删除。';
 });
+
+function previewClean(): void {
+  if (!cleanInfo.value.count) return;
+  const isPreview = cleanPreviewActive.value;
+  state.marqueeIds = isPreview ? [] : cleanInfo.value.ids;
+  state.marqueeRect = null;
+  state.marqueeMode = false;
+  setStatus(isPreview ? '已取消清理预览' : `已高亮 ${state.marqueeIds.length} 个待清理对象，请确认后净化`);
+}
 
 function onCleanPdf(): void {
   if (!state.doc.pdfImported) { toast('请先导入 PDF'); return; }
@@ -176,22 +223,58 @@ function onCleanPdf(): void {
   const d = result.details;
   showConfirm({
     title: '确认清理标注 / 文字？',
-    message: `将删除 ${result.count} 个矢量对象：黑色文字/引线 ${d.removedBlack || 0}，页面边框 ${d.removedFrame || 0}，主体外标记 ${d.removedOutside || 0}，小型文字簇 ${d.removedGlyph || 0}。主要房间结构会保留，清理后可按 Ctrl+Z 撤销。`,
+    message: `将删除 ${result.count} 个矢量对象：文字/引线 ${d.removedBlack || 0}，页面边框 ${d.removedFrame || 0}，主体外标记 ${d.removedOutside || 0}，小型文字簇 ${d.removedGlyph || 0}；已保护 ${d.rescuedSmall || 0} 个连接主结构的小路径。可按 Ctrl+Z 撤销。`,
     confirmText: `确认清理（${result.count}）`,
     danger: true,
     onConfirm: () => {
-      const remove = new Set(result.ids);
-      const oldCount = state.doc.objects.length;
-      snapshot();
-      state.doc.objects = state.doc.objects.filter(o => !remove.has(o.id));
-      state.marqueeIds = [];
-      if (state.selectedId && remove.has(state.selectedId)) state.selectedId = null;
-      markDirty();
-      const removed = oldCount - state.doc.objects.length;
-      setStatus(`已清理 ${removed} 个标注 / 文字对象，保留主要房间结构`);
+      const removed = deleteObjectsByIds(result.ids);
+      state.marqueeRect = null;
+      setStatus(`已清理 ${removed} 个标注 / 文字对象，主要房间结构已保留`);
       toast(`已清除 ${removed} 个标注 / 文字对象；可按 Ctrl+Z 撤销`);
     },
   });
+}
+
+// ---- 扫描页 / 图片底图净化 ----
+const selectedImage = computed(() => (selectedObjectRaw()?.type === 'imagebg' ? selectedObjectRaw() : null));
+const rasterThreshold = ref(175);
+const rasterGlyph = ref(80);
+const rasterBusy = ref(false);
+
+function selectedObjectRaw() {
+  return state.doc.objects.find(o => o.id === state.selectedId) ?? null;
+}
+
+async function onCleanRaster(): Promise<void> {
+  const o = selectedImage.value;
+  if (!o) { toast('请先选中一张图片底图'); return; }
+  if (isObjectLocked(state.doc, o)) { toast('图片底图所在图层已锁定'); return; }
+  rasterBusy.value = true;
+  try {
+    const r = await cleanRasterDataUrl(o.src, {
+      threshold: rasterThreshold.value,
+      maxGlyphSize: rasterGlyph.value,
+      removeThin: false,
+    });
+    const note = `噪点 ${r.removedNoise}、文字块 ${r.removedGlyphs}${r.removedThin ? `、细线 ${r.removedThin}` : ''}${r.inverted ? '（已自动反色）' : ''}`;
+    showConfirm({
+      title: '应用图片净化结果？',
+      message: `将替换当前底图为净化位图（${r.width}×${r.height} px），删除：${note}。原结果可通过撤销恢复。`,
+      confirmText: '应用净化',
+      onConfirm: () => {
+        o.src = r.dataUrl;
+        o.srcW = r.width;
+        o.srcH = r.height;
+        setStatus(`图片底图已净化：删除 ${r.removedNoise + r.removedGlyphs + r.removedThin} 个小型连通块`);
+        toast('图片底图净化完成，可按 Ctrl+Z 撤销');
+      },
+    });
+  } catch (err) {
+    toast('图片净化失败：' + String(err));
+    setStatus('图片底图净化失败', false);
+  } finally {
+    rasterBusy.value = false;
+  }
 }
 
 function onClear(): void {

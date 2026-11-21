@@ -1,4 +1,4 @@
-<!-- RoomSketch 2.0.1 — 单个对象渲染（移植 1.0.0 renderObj） -->
+<!-- RoomSketch 2.0.2 — 单个对象渲染（移植 1.0.0 renderObj） -->
 <template>
   <g :transform="`translate(${o.x || 0} ${o.y || 0})${o.rotation ? ` rotate(${o.rotation})` : ''}`" :data-id="o.id" :data-type="o.type">
     <!-- 墙体 -->
@@ -7,8 +7,9 @@
     <polyline v-else-if="o.type === 'polyline' || o.type === 'pdf' || o.type === 'line'" :points="pts(o.points)" fill="none" :stroke="stroke" :stroke-width="o.stroke ?? (o.type === 'pdf' ? 0.25 : 8)" stroke-linecap="round" stroke-linejoin="round" class="main-shape" :fill="o.closed ? (o.fill || 'none') : 'none'" />
     <!-- 房间 -->
     <template v-else-if="o.type === 'polyroom'">
-      <polygon :points="pts(o.points)" fill="#2e6ed8" fill-opacity="0.10" :stroke="stroke" :stroke-width="sw ?? 10" stroke-linejoin="round" class="main-shape" />
-      <text :x="centroid[0]" :y="centroid[1]" text-anchor="middle" :font-size="Math.max(80, Math.sqrt(polyArea(o.points)) / 5)" fill="#2e5fb0" pointer-events="none">{{ o.label || `≈ ${(polyArea(o.points) / 1e6).toFixed(1)} m²` }}</text>
+      <polygon :points="pts(o.points)" :fill="o.fill || '#2e6ed8'" :fill-opacity="o.fillOpacity ?? 0.12" :stroke="stroke" :stroke-width="sw ?? 10" stroke-linejoin="round" class="main-shape" />
+      <text :x="centroid[0]" :y="centroid[1] - roomFontSize * 0.25" text-anchor="middle" :font-size="roomFontSize" :fill="stroke" paint-order="stroke" stroke="#ffffff" stroke-opacity="0.82" :stroke-width="roomFontSize * 0.1" pointer-events="none">{{ roomText.name }}</text>
+      <text :x="centroid[0]" :y="centroid[1] + roomFontSize * 0.9" text-anchor="middle" :font-size="roomFontSize * 0.68" :fill="stroke" paint-order="stroke" stroke="#ffffff" stroke-opacity="0.82" :stroke-width="roomFontSize * 0.08" pointer-events="none">{{ roomText.area }}</text>
     </template>
     <!-- 图片底图 -->
     <image v-else-if="o.type === 'imagebg'" x="0" y="0" :width="o.w" :height="o.h" preserveAspectRatio="none" :opacity="o.opacity ?? 1" class="main-shape" :href="o.src" />
@@ -56,6 +57,7 @@ import { computed } from 'vue';
 import type { RsObject } from '../model/types.ts';
 import { polyArea, polyCentroid } from '../model/geometry.ts';
 import { furnBaseShapes, furnDetailShapes } from '../model/furnitureRender.ts';
+import { roomLabelText } from '../model/rooms.ts';
 
 const props = defineProps<{ o: RsObject }>();
 // 注意：父组件会用新对象替换 props.o（绘制预览每帧、撤销/重做、打开工程都会换对象）。
@@ -67,8 +69,10 @@ const sw = computed(() => o.value.stroke || 12);
 const dir = computed(() => (o.value.type === 'door' ? (o.value.dir || 1) : 1));
 const len = computed(() => (o.value.type === 'dimension' ? (o.value.length || o.value.w || 0) : 0));
 const centroid = computed(() => (o.value.type === 'polyroom' ? polyCentroid(o.value.points) : [0, 0]));
-const furnBase = computed(() => (o.value.type === 'furniture' ? furnBaseShapes(o.value.label, o.value.w, o.value.h, stroke.value, sw.value) : []));
-const furnDetail = computed(() => (o.value.type === 'furniture' ? furnDetailShapes(o.value.label, o.value.w, o.value.h, stroke.value, sw.value) : []));
+const roomFontSize = computed(() => (o.value.type === 'polyroom' ? Math.max(80, Math.sqrt(polyArea(o.value.points)) / 5) : 80));
+const roomText = computed(() => o.value.type === 'polyroom' ? roomLabelText(o.value) : { name: '', area: '' });
+const furnBase = computed(() => (o.value.type === 'furniture' ? furnBaseShapes(o.value.label, o.value.w, o.value.h, stroke.value, sw.value, o.value.kind) : []));
+const furnDetail = computed(() => (o.value.type === 'furniture' ? furnDetailShapes(o.value.label, o.value.w, o.value.h, stroke.value, sw.value, o.value.kind) : []));
 function pts(points: [number, number][] | undefined): string {
   return (points || []).map(p => p.join(',')).join(' ');
 }

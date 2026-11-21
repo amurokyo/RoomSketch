@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — 数据模型 / 工程 IO / 历史 / 门窗关联测试
+// RoomSketch 2.0.2 — 数据模型 / 工程 IO / 历史 / 门窗关联测试
 // 用法：node tests/test-model.mjs
 // 覆盖：工程文件新格式校验、旧版 {app:'RoomSketch'} 升级、非法 schema 拒绝、
 // 损坏文件拒绝、History 撤销/重做/上限、门窗贴墙与墙动跟随（移植 1.0.0 用例）。
@@ -16,15 +16,15 @@ const approx = (a, b) => Math.abs(a - b) < 0.01;
 
 // ---------- 工程文件 ----------
 const empty = createEmptyProject();
-check('新工程 appVersion=2.0.1', empty.appVersion === '2.0.1' && empty.format === 'roomsketch', empty.appVersion);
+check('新工程 appVersion=2.0.2', empty.appVersion === '2.0.2' && empty.format === 'roomsketch', empty.appVersion);
 check('新工程 schemaVersion=1', empty.schemaVersion === 1);
-check('版本常量与源码一致', APP_VERSION === '2.0.1' && SCHEMA_VERSION === 1);
+check('版本常量与源码一致', APP_VERSION === '2.0.2' && SCHEMA_VERSION === 1);
 
 const good = validateProject(JSON.parse(serializeProject(empty)));
-check('序列化后可重新校验', good.ok === true && good.doc?.appVersion === '2.0.1');
+check('序列化后可重新校验', good.ok === true && good.doc?.appVersion === '2.0.2');
 
 const old = validateProject({ app: 'RoomSketch', version: 2, objects: [{ id: 'o1', type: 'rect', x: 0, y: 0, w: 100, h: 100 }], counter: 5 });
-check('旧版 {app:RoomSketch} 可打开并升级', old.ok === true && old.upgradedFromOld === true && old.doc?.appVersion === '2.0.1' && old.doc?.objects.length === 1);
+check('旧版 {app:RoomSketch} 可打开并升级', old.ok === true && old.upgradedFromOld === true && old.doc?.appVersion === '2.0.2' && old.doc?.objects.length === 1);
 
 check('不支持的 schemaVersion 被拒绝', validateProject({ format: 'roomsketch', schemaVersion: 99, objects: [] }).ok === false);
 check('非 RoomSketch 文件被拒绝', validateProject({ format: 'other', objects: [] }).ok === false);

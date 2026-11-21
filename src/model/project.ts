@@ -1,11 +1,12 @@
-// RoomSketch 2.0.1 — 工程文件校验与版本迁移入口（文档 §7）
-// 格式：{format:'roomsketch', schemaVersion:1, appVersion:'2.0.1', metadata, ...}
+// RoomSketch 2.0.2 — 工程文件校验与版本迁移入口（文档 §7）
+// 格式：{format:'roomsketch', schemaVersion:1, appVersion:'2.0.2', metadata, ...}
 // 兼容：旧版 {app:'RoomSketch', version:2} 打开时升级为当前格式；
 // 不支持的 schemaVersion 明确报错，绝不静默覆盖或静默忽略。
 import { APP_VERSION, FORMAT, SCHEMA_VERSION } from '../version.ts';
 import type { ProjectDoc, RsObject } from './types.ts';
 import { DEFAULT_SCALE, DEFAULT_VIEW } from './types.ts';
 import { normalizeOpenings } from './wallLink.ts';
+import { defaultLayers, normalizeLayerOrder, normalizeLayers } from './layers.ts';
 
 export function createEmptyProject(): ProjectDoc {
   const now = new Date().toISOString();
@@ -20,6 +21,9 @@ export function createEmptyProject(): ProjectDoc {
     scale: DEFAULT_SCALE,
     pdfImported: false,
     pdfPageSize: null,
+    pdfPageSizes: {},
+    layers: defaultLayers(),
+    layerOrder: normalizeLayerOrder(undefined),
   };
 }
 
@@ -94,6 +98,11 @@ export function validateProject(data: unknown): ValidateResult {
     pdfPageSize: isRecord(data.pdfPageSize) && Number.isFinite(Number(data.pdfPageSize.w))
       ? { w: Number(data.pdfPageSize.w), h: Number(data.pdfPageSize.h) }
       : null,
+    pdfPageSizes: isRecord(data.pdfPageSizes)
+      ? Object.fromEntries(Object.entries(data.pdfPageSizes).filter(([, v]) => isRecord(v) && Number.isFinite(Number(v.w)) && Number.isFinite(Number(v.h))).map(([k, v]) => [k, { w: Number((v as { w: unknown }).w), h: Number((v as { h: unknown }).h) }]))
+      : {},
+    layers: normalizeLayers(data.layers),
+    layerOrder: normalizeLayerOrder(data.layerOrder),
   };
   return finishDoc(doc, isOld);
 }

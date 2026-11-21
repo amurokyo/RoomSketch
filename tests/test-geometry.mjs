@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — 几何模块测试（Node 直接导入 TS 源码，Node 24 类型剥离）
+// RoomSketch 2.0.2 — 几何模块测试（Node 直接导入 TS 源码，Node 24 类型剥离）
 // 用法：node tests/test-geometry.mjs
 // 覆盖：旋转包围盒（与 1.0.0 test-bounds 同批用例 + 独立 oracle）、
 // polyArea/polyCentroid、点段投影、局部/世界坐标互逆。

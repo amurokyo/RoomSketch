@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — 统一工程文档模型（文档 §7）
+// RoomSketch 2.0.2 — 统一工程文档模型（文档 §7）
 // 对象字段与 1.0.0 保持一致（同名字段、同义语义），因此 1.0.0 工程文件
 // 无需迁移即可打开；schemaVersion 仍为 1，appVersion 写 2.0.0。
 // 坐标单位：毫米（mm）。对象原点 (x, y) + 局部坐标；rotation 为绕原点的度数。
@@ -32,6 +32,12 @@ export interface WallObject extends BaseObject {
 export interface PolyroomObject extends BaseObject {
   type: 'polyroom';
   points: Point[];
+  /** 功能分区，如公共区 / 办公区 / 休息区 */
+  zone?: string;
+  /** 房间填充不透明度，默认 0.12 */
+  fillOpacity?: number;
+  /** 是否计入面积统计，默认 true */
+  includeInTotal?: boolean;
 }
 
 export interface RectObject extends BaseObject {
@@ -47,12 +53,16 @@ export interface LineObject extends BaseObject {
   /** PDF 导入产生的矢量对象 */
   pdfOrigin?: boolean;
   pdfStrokeColor?: string;
+  /** 来源页码（从 1 开始），用于逐页安全清理 */
+  pdfPage?: number;
 }
 
 export interface FurnitureObject extends BaseObject {
   type: 'furniture';
   w: number;
   h: number;
+  /** 稳定的家具图形类型；旧工程缺省时由名称推断 */
+  kind?: string;
   /** 三维高度（mm），默认由名称关键字推断 */
   furnH?: number;
 }
@@ -110,6 +120,10 @@ export interface ProjectMeta {
   updatedAt: string;
 }
 
+export type LayerId = 'background' | 'pdf' | 'rooms' | 'walls' | 'furniture' | 'openings' | 'annotations';
+export interface LayerState { visible: boolean; locked: boolean }
+export type LayerStateMap = Record<LayerId, LayerState>;
+
 export interface ProjectDoc {
   format: 'roomsketch';
   schemaVersion: number;
@@ -121,6 +135,12 @@ export interface ProjectDoc {
   scale: number;
   pdfImported: boolean;
   pdfPageSize: { w: number; h: number } | null;
+  /** 各页尺寸，键为页码；兼容旧工程单页 pdfPageSize */
+  pdfPageSizes?: Record<string, { w: number; h: number }>;
+  /** 固定类型图层状态；旧工程打开时自动补齐 */
+  layers?: LayerStateMap;
+  /** 图层从底到顶的显示顺序 */
+  layerOrder?: LayerId[];
 }
 
 export const DEFAULT_VIEW: ViewBox = { x: 0, y: 0, w: 12000, h: 8000 };

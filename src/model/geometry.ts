@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — 统一几何模块（文档 §6.2）
+// RoomSketch 2.0.2 — 统一几何模块（文档 §6.2）
 // 与 1.0.0 的 objBounds 完全同一套数学：先取局部包围盒，再按 rotation
 // 绕对象原点旋转四个角，取轴对齐包围盒。render() 用 translate(x,y)
 // rotate(rotation) 绘制，包围盒必须用同一变换，否则选框 / 适合窗口 /
@@ -76,8 +76,45 @@ export function boundsUnion(bs: Bounds[]): Bounds | null {
   return { x, y, w: Math.max(1, r - x), h: Math.max(1, bt - y) };
 }
 
-/** 导出范围：'all' 为全部对象的包围盒 + 4% 边距（至少 50mm）；'view' 为当前视图。 */
-export function exportRectFor(objects: RsObject[], view: ViewBox, scope: 'view' | 'all'): Bounds {
+/** 导出专用包围盒：厚墙按真实墙厚，文字和房间名称也纳入，避免紧致导出裁切。 */
+export function exportObjectBounds(o: RsObject): Bounds {
+  // 图片底图无边框，紧致导出时不应被默认描边外扩。
+  if (o.type === 'imagebg') return objBounds({ ...o, stroke: Number.EPSILON });
+  const base = objBounds(o);
+  if (o.type === 'wall') {
+    const extra = Math.max(0, (o.wallWidth || 120) - (o.stroke || 10)) / 2;
+    return { x: base.x - extra, y: base.y - extra, w: base.w + extra * 2, h: base.h + extra * 2 };
+  }
+  if (o.type === 'label') {
+    const size = o.fontSize || 120, width = Math.max(size, Array.from(o.label || '文字标注').length * size);
+    const textBox = { x: o.x || 0, y: (o.y || 0) - size, w: width, h: size * 1.25 };
+    return boundsUnion([base, textBox]) || base;
+  }
+  if (o.type === 'polyroom') {
+    const c = polyCentroid(o.points), size = Math.max(80, Math.sqrt(polyArea(o.points)) / 5);
+    const name = o.label?.trim() || '未命名房间';
+    const labelBox = {
+      x: (o.x || 0) + c[0] - Math.max(name.length, 10) * size * 0.32,
+      y: (o.y || 0) + c[1] - size * 1.3,
+      w: Math.max(name.length, 10) * size * 0.64, h: size * 2.5,
+    };
+    return boundsUnion([base, labelBox]) || base;
+  }
+  return base;
+}
+
+/** 'tight' 仅包围实际导出的内容并使用固定小边距；'all' 保留旧版 4% 边距行为。 */
+export function exportRectFor(
+  objects: RsObject[], view: ViewBox, scope: 'view' | 'all' | 'tight',
+  options: { padding?: number } = {},
+): Bounds {
+  if (scope === 'tight' && objects.length) {
+    const union = boundsUnion(objects.map(exportObjectBounds));
+    if (union) {
+      const pad = Math.max(0, options.padding ?? 80);
+      return { x: union.x - pad, y: union.y - pad, w: union.w + pad * 2, h: union.h + pad * 2 };
+    }
+  }
   if (scope === 'all' && objects.length) {
     const bs = objects.map(objBounds);
     const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y));

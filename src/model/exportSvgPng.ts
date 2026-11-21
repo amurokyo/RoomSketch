@@ -1,4 +1,4 @@
-// RoomSketch 2.0.1 — SVG / PNG 导出（阶段五）
+// RoomSketch 2.0.2 — SVG / PNG 导出（阶段五）
 // SVG：克隆页面上已渲染的 #canvas（与屏幕所见同一份矢量），去掉交互层
 // （#selection-ui 选中框/手柄、#draft 绘制草稿），按导出范围设 viewBox。
 // 形状全部用 presentation 属性绘制（ObjectShape），不依赖页面 CSS，
@@ -13,6 +13,8 @@ export interface SvgExportOptions {
   /** 可选：覆盖 SVG 根元素的 width/height 属性（PNG 导出用像素值） */
   widthAttr?: string;
   heightAttr?: string;
+  /** 实际参与导出的对象；用于排除底图或隐藏图层 */
+  includeIds?: Set<string>;
 }
 
 const SVG_FONT_STYLE = 'text{font-family:system-ui,"Microsoft YaHei","PingFang SC",sans-serif}';
@@ -35,6 +37,12 @@ export function serializeCanvasSvg(rect: Bounds, opts: SvgExportOptions): string
   all.querySelector('#selection-ui')?.remove();
   all.querySelector('#draft')?.remove();
   if (opts.hideGrid) all.querySelector('#gridBg')?.remove();
+  if (opts.includeIds) {
+    all.querySelectorAll('[data-id]').forEach(el => {
+      const id = el.getAttribute('data-id');
+      if (!id || !opts.includeIds!.has(id)) el.remove();
+    });
+  }
   const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
   style.textContent = SVG_FONT_STYLE;
   all.insertBefore(style, all.firstChild);
