@@ -9,7 +9,7 @@
 | 文件 | 大小 | SHA-256 |
 |---|---:|---|
 | `RoomSketch-2.0.2.html`（= `dist/index.html`） | 2,569,900 字节 | `d6ca505d4775da490f4712f01f5c95b8a8bdc29289f3a80dcd6a670f93d665dc` |
-| `RoomSketch-2.0.2-Offline.zip`（html + README + CHANGELOG + LICENSE + THIRD-PARTY-LICENSES.md + SHA256SUMS.txt） | 765,589 字节 | `b61a20c9e2902b02ef8c36c73ae3eae153ab525c94245808b245f30ef053e874` |
+| `RoomSketch-2.0.2-Offline.zip`（html + README + CHANGELOG + LICENSE + THIRD-PARTY-LICENSES.md + SHA256SUMS.txt） | 765,579 字节 | `6d07bb17140d1b42d8c7d53c8b20936b4de960d762c49b10b98a8a42f2f9e1d7` |
 | `SHA256SUMS.txt` | 5 个交付文件校验和 | — |
 | `ACCEPTANCE-2.0.2.md` | 本报告 | — |
 

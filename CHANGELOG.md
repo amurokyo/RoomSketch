@@ -24,7 +24,7 @@
 ### 交付
 
 - `RoomSketch-2.0.2.html`（与 `dist/index.html` 内容相同，2,569,900 字节）
-- `RoomSketch-2.0.2-Offline.zip`（765,483 字节）
+- `RoomSketch-2.0.2-Offline.zip`（单文件应用 + README + CHANGELOG + LICENSE + THIRD-PARTY-LICENSES.md + SHA256SUMS.txt）
 - `SHA256SUMS.txt`
 - `ACCEPTANCE-2.0.2.md`（发布验收报告）
 
